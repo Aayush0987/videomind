@@ -66,3 +66,9 @@ class TranscriptUnavailableError(VideoMindError):
     """All four transcript acquisition rungs (§9.3) failed."""
 
     error_code = "transcript_unavailable"
+
+
+class EmbeddingBackendUnavailable(VideoMindError):
+    """Embedding API connection failure or non-2xx response."""
+
+    error_code = "embedding_backend_unavailable"

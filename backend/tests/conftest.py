@@ -4,7 +4,7 @@ from collections.abc import Iterator
 
 import pytest
 from app import config
-from app.core import db, ratelimit
+from app.core import db, embedder, ratelimit
 
 # Deliberately no top-level `import litellm` here -- this file lives under
 # `tests/`, which is also covered by the ruff litellm import ban (§7). The
@@ -42,3 +42,10 @@ def _reset_db_connection() -> Iterator[None]:
     db.reset_connection()
     yield
     db.reset_connection()
+
+
+@pytest.fixture(autouse=True)
+def _reset_embedder_singleton() -> Iterator[None]:
+    embedder.reset_embedder()
+    yield
+    embedder.reset_embedder()
