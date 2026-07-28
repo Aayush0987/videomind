@@ -2,8 +2,9 @@
 
 The full closed set of `error_code` strings is defined in the build spec
 §14.1 and owned by the API layer (Phase 8). This module only defines the
-error classes that Phase 1 code (`core/llm.py`, `core/ratelimit.py`) raises;
-later phases add their own subclasses here as they need them.
+error classes that Phase 1 (`core/llm.py`, `core/ratelimit.py`) and Phase 2
+(`ingestion/*.py`, `services/pipeline.py`) code raises; later phases add
+their own subclasses here as they need them.
 """
 
 
@@ -41,3 +42,27 @@ class DailyQuotaExhausted(VideoMindError):
     """RateLimiter.acquire hit the configured daily quota (rpd)."""
 
     error_code = "quota_exhausted"
+
+
+class UnsupportedSourceError(VideoMindError):
+    """`parse_video_id` could not extract a video id from the given URL."""
+
+    error_code = "invalid_url"
+
+
+class VideoTooLongError(VideoMindError):
+    """Video duration exceeds `settings.MAX_VIDEO_DURATION`."""
+
+    error_code = "video_too_long"
+
+
+class MetadataUnavailableError(VideoMindError):
+    """Both the YouTube Data API and the yt-dlp metadata fallback failed."""
+
+    error_code = "metadata_unavailable"
+
+
+class TranscriptUnavailableError(VideoMindError):
+    """All four transcript acquisition rungs (§9.3) failed."""
+
+    error_code = "transcript_unavailable"

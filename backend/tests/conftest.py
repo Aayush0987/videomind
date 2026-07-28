@@ -4,7 +4,7 @@ from collections.abc import Iterator
 
 import pytest
 from app import config
-from app.core import ratelimit
+from app.core import db, ratelimit
 
 # Deliberately no top-level `import litellm` here -- this file lives under
 # `tests/`, which is also covered by the ruff litellm import ban (§7). The
@@ -35,3 +35,10 @@ def _reset_rate_limiter_registry() -> Iterator[None]:
     ratelimit.reset_registry()
     yield
     ratelimit.reset_registry()
+
+
+@pytest.fixture(autouse=True)
+def _reset_db_connection() -> Iterator[None]:
+    db.reset_connection()
+    yield
+    db.reset_connection()

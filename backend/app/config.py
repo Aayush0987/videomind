@@ -60,3 +60,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# --- Tuning constants (code-level, not environment-configurable; bump in
+# code review, not via .env) ---
+CURRENT_ANALYSIS_VERSION = 1
+UNIT_MAX_SECONDS = 15.0
+UNIT_MAX_CHARS = 350
