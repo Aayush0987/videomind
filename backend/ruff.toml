@@ -3,7 +3,13 @@ target-version = "py311"
 src = ["app", "tests", "scripts"]
 
 [lint]
-select = ["E", "F", "I", "UP", "B", "SIM"]
+select = ["E", "F", "I", "UP", "B", "SIM", "TID251"]
+
+[lint.flake8-tidy-imports.banned-api]
+"litellm".msg = "Only app/core/llm.py may import litellm; use app.core.llm.generate/generate_structured instead."
+"openai".msg = "Provider SDKs must not be imported directly; go through app.core.llm."
+"anthropic".msg = "Provider SDKs must not be imported directly; go through app.core.llm."
+"google.generativeai".msg = "Provider SDKs must not be imported directly; go through app.core.llm."
 
 [format]
 quote-style = "double"

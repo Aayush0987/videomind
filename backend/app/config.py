@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     GEMINI_RPD: int = 1000
     OPENAI_RPM: int = 60
     ANTHROPIC_RPM: int = 50
+    CUSTOM_RPM: int = 60
 
     # --- YouTube ---
     YOUTUBE_API_KEY: str | None = None
@@ -56,3 +57,6 @@ class Settings(BaseSettings):
     FRONTEND_ORIGIN: str = "http://localhost:3000"
     ANALYZE_RATE_PER_HOUR: int = 20
     LOG_LEVEL: str = "INFO"
+
+
+settings = Settings()
