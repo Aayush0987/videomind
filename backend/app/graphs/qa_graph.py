@@ -9,6 +9,7 @@ guardrail that drops any citation the model invented before the user sees it.
 """
 
 import re
+import time
 
 from langgraph.graph import END, START, StateGraph
 
@@ -215,6 +216,23 @@ def _graph():
     return _GRAPH
 
 
+def _build_trace(state: QAState, metrics, latency_ms: float) -> dict:
+    """Assemble the agent-trace product feature (§14.2/§16.5) from the run's
+    final state and in-process metrics."""
+    plan = state.get("plan")
+    grades = state.get("grades")
+    kept = len(_kept_chunk_ids(state)) if grades is not None else 0
+    return {
+        "strategy": plan.strategy if plan is not None else "direct",
+        "retrieval_attempts": state.get("retrieval_attempts", 0),
+        "chunks_retrieved": len(state.get("chunks", [])),
+        "chunks_kept": kept,
+        "dropped_citations": metrics.dropped_citations if metrics is not None else 0,
+        "nodes": list(metrics.node_path) if metrics is not None else [],
+        "latency_ms": round(latency_ms),
+    }
+
+
 async def run_qa(
     video_id: str,
     question: str,
@@ -224,7 +242,7 @@ async def run_qa(
 ) -> QAState:
     """Run the Q&A graph end to end, wrapped in one MLflow run (§17)."""
     params = {"video_id": video_id, "provider": llm.provider, "model": llm.model}
-    async with tracing.run_context("videomind-qa", params):
+    async with tracing.run_context("videomind-qa", params) as metrics:
         state: QAState = {
             "video_id": video_id,
             "question": question,
@@ -232,5 +250,7 @@ async def run_qa(
             "history": history or [],
             "retrieval_attempts": 0,
         }
+        start = time.perf_counter()
         result: QAState = await _graph().ainvoke(state, config={"recursion_limit": 50})
+        result["trace"] = _build_trace(result, metrics, (time.perf_counter() - start) * 1000.0)
     return result

@@ -73,6 +73,10 @@ async def propose_boundaries(state: AnalysisState) -> dict:
     _progress(state["job_id"], "propose_boundaries")
     transcript = state["transcript"]
     metadata = state["metadata"]
+    attempts = state.get("segmentation_attempts", 0) + 1
+    # A re-segmentation surfaces as an amber retry indicator in the UI (§16.4).
+    if attempts > 1:
+        jobs.update(state["job_id"], retries={"segmentation": attempts - 1})
     boundaries = await segmentation.propose_boundaries(
         transcript.units,
         state["unit_embeddings"],
@@ -83,7 +87,7 @@ async def propose_boundaries(state: AnalysisState) -> dict:
     # Reset the repair flag so a fresh segmentation gets its own repair attempt.
     return {
         "boundaries": boundaries,
-        "segmentation_attempts": state.get("segmentation_attempts", 0) + 1,
+        "segmentation_attempts": attempts,
         "verification": None,
     }
 

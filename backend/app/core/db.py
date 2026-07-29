@@ -225,6 +225,50 @@ def upsert_chapters(conn: sqlite3.Connection, video_id: str, chapters: list[Chap
     conn.commit()
 
 
+def get_chapters(conn: sqlite3.Connection, video_id: str) -> list[Chapter]:
+    rows = conn.execute(
+        "SELECT * FROM chapters WHERE video_id = ? ORDER BY idx", (video_id,)
+    ).fetchall()
+    return [
+        Chapter(
+            chapter_id=row["chapter_id"],
+            idx=row["idx"],
+            start=row["start"],
+            end=row["end"],
+            title=row["title"],
+            summary=row["summary"],
+            key_points=json.loads(row["key_points_json"]),
+        )
+        for row in rows
+    ]
+
+
+def get_enrichments(conn: sqlite3.Connection, video_id: str) -> list[EnrichmentNote]:
+    rows = conn.execute(
+        "SELECT * FROM enrichments WHERE video_id = ? ORDER BY first_mention", (video_id,)
+    ).fetchall()
+    return [
+        EnrichmentNote(
+            entity=row["entity"],
+            kind=row["kind"],
+            blurb=row["blurb"],
+            source_url=row["source_url"],
+            first_mention=row["first_mention"],
+        )
+        for row in rows
+    ]
+
+
+def count_videos(conn: sqlite3.Connection) -> int:
+    return conn.execute("SELECT COUNT(*) AS n FROM videos").fetchone()["n"]
+
+
+def delete_video(conn: sqlite3.Connection, video_id: str) -> None:
+    for table in ("enrichments", "chapters", "transcripts", "videos"):
+        conn.execute(f"DELETE FROM {table} WHERE video_id = ?", (video_id,))
+    conn.commit()
+
+
 def upsert_enrichments(
     conn: sqlite3.Connection, video_id: str, notes: list[EnrichmentNote]
 ) -> None:

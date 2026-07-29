@@ -72,3 +72,22 @@ class EmbeddingBackendUnavailable(VideoMindError):
     """Embedding API connection failure or non-2xx response."""
 
     error_code = "embedding_backend_unavailable"
+
+
+class VideoNotFound(VideoMindError):
+    """No analysis row exists for the requested `video_id` (§14.2)."""
+
+    error_code = "video_not_found"
+
+
+class JobNotFound(VideoMindError):
+    """No job row exists for the requested `job_id` (§14.2)."""
+
+    error_code = "job_not_found"
+
+
+class EmbeddingMismatch(VideoMindError):
+    """A cached video was indexed with a different embedder than the one now
+    configured (§7.6) — `GET /api/videos/{id}` returns 409."""
+
+    error_code = "embedding_mismatch"

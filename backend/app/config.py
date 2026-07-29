@@ -66,6 +66,8 @@ settings = Settings()
 
 # --- Tuning constants (code-level, not environment-configurable; bump in
 # code review, not via .env) ---
+APP_VERSION = "1.0.0"
+MAX_CONCURRENT_JOBS = 1  # §15 — one Whisper job at a time on a free-tier box.
 CURRENT_ANALYSIS_VERSION = 1
 UNIT_MAX_SECONDS = 15.0
 UNIT_MAX_CHARS = 350
@@ -103,6 +105,9 @@ LOW_CONFIDENCE_HEDGE = (
     "I couldn't ground this answer in specific passages, so treat it with caution:"
 )
 
+# §15 — recorded on any job left `running`/`queued` by a mid-job restart.
+INTERRUPTED_MESSAGE = "Processing was interrupted. Try again."
+
 # Per-stage progress weights (§10.3). Sum to 1.0; each analysis-graph node's
 # first action reports `jobs.update(job_id, stage=<name>, progress=cumulative)`.
 STAGE_WEIGHTS: dict[str, float] = {
@@ -115,4 +120,18 @@ STAGE_WEIGHTS: dict[str, float] = {
     "entities": 0.05,
     "enrich": 0.05,
     "index": 0.05,
+}
+
+# §14.2/§16.4 — user-facing label for each stage, shown in the processing
+# timeline while a job polls. Keyed to STAGE_WEIGHTS.
+STAGE_LABELS: dict[str, str] = {
+    "resolve_source": "Resolving video",
+    "fetch_transcript": "Fetching transcript",
+    "normalize": "Normalizing transcript",
+    "propose_boundaries": "Detecting chapter boundaries",
+    "verify_repair": "Verifying chapters",
+    "title_and_summarize": "Writing chapter summaries",
+    "entities": "Extracting key entities",
+    "enrich": "Adding background notes",
+    "index": "Indexing for search",
 }

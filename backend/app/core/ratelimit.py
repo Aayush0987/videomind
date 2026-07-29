@@ -7,12 +7,14 @@ held in a module-level registry because `acquire()` runs on every LLM call.
 
 import asyncio
 import time
-from collections import deque
+from collections import defaultdict, deque
 from collections.abc import Awaitable, Callable
 
+from app.config import settings
 from app.core.errors import DailyQuotaExhausted
 
 _MINUTE_SECONDS = 60.0
+_HOUR_SECONDS = 3600.0
 _DAY_SECONDS = 86400.0
 
 
@@ -63,7 +65,29 @@ class RateLimiter:
             window.popleft()
 
 
+class IPRateLimiter:
+    """Simple per-IP sliding-window cap on `POST /api/videos` (§14.3) — the
+    public demo must not be a free Whisper farm. Synchronous: it gates the
+    request handler, it does not block on a slot."""
+
+    def __init__(self, limit: int, *, clock: Callable[[], float] = time.monotonic) -> None:
+        self._limit = limit
+        self._clock = clock
+        self._hits: dict[str, deque[float]] = defaultdict(deque)
+
+    def allow(self, ip: str) -> bool:
+        now = self._clock()
+        window = self._hits[ip]
+        while window and now - window[0] >= _HOUR_SECONDS:
+            window.popleft()
+        if len(window) >= self._limit:
+            return False
+        window.append(now)
+        return True
+
+
 _REGISTRY: dict[tuple[str, str], RateLimiter] = {}
+_ip_limiter: IPRateLimiter | None = None
 
 
 def get_rate_limiter(provider: str, model: str, *, rpm: int, rpd: int | None = None) -> RateLimiter:
@@ -73,7 +97,16 @@ def get_rate_limiter(provider: str, model: str, *, rpm: int, rpd: int | None = N
     return _REGISTRY[key]
 
 
+def get_ip_limiter() -> IPRateLimiter:
+    global _ip_limiter  # noqa: PLW0603
+    if _ip_limiter is None:
+        _ip_limiter = IPRateLimiter(settings.ANALYZE_RATE_PER_HOUR)
+    return _ip_limiter
+
+
 def reset_registry() -> None:
     """Test-only escape hatch: clears cached limiters so tests don't leak
     accumulated call timestamps across the module-level registry."""
+    global _ip_limiter  # noqa: PLW0603
     _REGISTRY.clear()
+    _ip_limiter = None

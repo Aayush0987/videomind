@@ -45,3 +45,4 @@ class QAState(TypedDict, total=False):
     answer: str
     retrieval_attempts: int
     insufficient: bool
+    trace: dict
