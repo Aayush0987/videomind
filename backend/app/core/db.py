@@ -7,6 +7,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from app.config import CURRENT_ANALYSIS_VERSION, settings
+from app.schemas.chapters import Chapter
+from app.schemas.enrichment import EnrichmentNote
 from app.schemas.transcript import TranscriptCue
 
 _SCHEMA = """
@@ -196,3 +198,43 @@ def get_transcript_cues(conn: sqlite3.Connection, video_id: str) -> list[Transcr
     if row is None:
         return None
     return [TranscriptCue(**cue) for cue in json.loads(row["cues_json"])]
+
+
+def upsert_chapters(conn: sqlite3.Connection, video_id: str, chapters: list[Chapter]) -> None:
+    conn.execute("DELETE FROM chapters WHERE video_id = ?", (video_id,))
+    conn.executemany(
+        """
+        INSERT INTO chapters (
+            video_id, chapter_id, idx, start, end, title, summary, key_points_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        [
+            (
+                video_id,
+                ch.chapter_id,
+                ch.idx,
+                ch.start,
+                ch.end,
+                ch.title,
+                ch.summary,
+                json.dumps(ch.key_points),
+            )
+            for ch in chapters
+        ],
+    )
+    conn.commit()
+
+
+def upsert_enrichments(
+    conn: sqlite3.Connection, video_id: str, notes: list[EnrichmentNote]
+) -> None:
+    conn.execute("DELETE FROM enrichments WHERE video_id = ?", (video_id,))
+    conn.executemany(
+        """
+        INSERT INTO enrichments (
+            video_id, entity, kind, blurb, source_url, first_mention
+        ) VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        [(video_id, n.entity, n.kind, n.blurb, n.source_url, n.first_mention) for n in notes],
+    )
+    conn.commit()

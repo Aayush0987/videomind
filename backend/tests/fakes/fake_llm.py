@@ -9,6 +9,7 @@ starting in Phase 8.
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
+from app.core import tracing
 from app.core.errors import StructuredOutputError
 from app.core.llm import LLMConfig
 from pydantic import BaseModel
@@ -42,6 +43,7 @@ class FakeLLM:
 
     async def generate(self, prompt: str, cfg: LLMConfig, *, system: str | None = None) -> str:
         self.call_log.append(CallRecord("generate", prompt, None))
+        tracing.record_llm_call()
         self._raise_if_pending(schema=None)
         response = self.responses.get(prompt)
         if response is None:
@@ -58,6 +60,7 @@ class FakeLLM:
         repair_attempts: int = 1,
     ) -> T:
         self.call_log.append(CallRecord("generate_structured", prompt, schema))
+        tracing.record_llm_call()
         self._raise_if_pending(schema=schema)
         response = self.responses.get(prompt, self.responses.get(schema.__name__))
         if response is None:

@@ -81,3 +81,17 @@ TITLING_CHAR_BUDGET = 6000
 BANNED_TITLE_PREFIXES = ("chapter", "introduction to")
 MAX_ENTITIES = 15
 MAX_ENRICHMENTS = 6
+
+# Per-stage progress weights (§10.3). Sum to 1.0; each analysis-graph node's
+# first action reports `jobs.update(job_id, stage=<name>, progress=cumulative)`.
+STAGE_WEIGHTS: dict[str, float] = {
+    "resolve_source": 0.05,
+    "fetch_transcript": 0.30,
+    "normalize": 0.05,
+    "propose_boundaries": 0.20,
+    "verify_repair": 0.05,
+    "title_and_summarize": 0.20,
+    "entities": 0.05,
+    "enrich": 0.05,
+    "index": 0.05,
+}

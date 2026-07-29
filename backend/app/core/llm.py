@@ -18,6 +18,7 @@ import litellm  # noqa: TID251 -- this file is the sanctioned litellm boundary
 from pydantic import BaseModel, ValidationError
 
 from app.config import settings
+from app.core import tracing
 from app.core.errors import LLMAuthError, LLMUnavailableError, StructuredOutputError
 from app.core.ratelimit import get_rate_limiter
 
@@ -176,6 +177,7 @@ async def _complete(
 ) -> Any:
     rpm, rpd = _LIMITS_BY_PROVIDER[cfg.provider]()
     limiter = get_rate_limiter(cfg.provider, cfg.model, rpm=rpm, rpd=rpd)
+    tracing.record_llm_call()
     last_exc: Exception | None = None
     for attempt in range(1, _MAX_ATTEMPTS + 1):
         await limiter.acquire()

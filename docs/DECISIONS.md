@@ -36,3 +36,15 @@ LLM-based grading agent instead, which can reason about sufficiency rather
 than just pairwise similarity. A reranker is explicitly future work.
 
 See §25.2.
+
+## 4. Opt into MLflow's file-store backend
+
+The plan pins `MLFLOW_TRACKING_URI=file:./data/mlruns` for the free tier
+(§17, §19), but MLflow 3.x puts the filesystem tracking backend in
+"maintenance mode" and refuses to open it unless `MLFLOW_ALLOW_FILE_STORE`
+is set. `core/tracing.run_context` sets that env var (via `setdefault`, so
+a real deployment can still override the backend) immediately before
+configuring the tracking URI. This keeps the documented zero-infrastructure
+local/free-tier setup working without introducing a database dependency.
+
+See §17.
