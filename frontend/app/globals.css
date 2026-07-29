@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background-color: #12151c;
+  color: #eceff4;
+}
+
+/* Timecodes are always tabular so digits don't jitter as they tick (§16.2). */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Visible keyboard focus rings everywhere — the unannounced quality floor. */
+:focus-visible {
+  outline: 2px solid #38e1d4;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Thin, unobtrusive scrollbars on the chapter rail and chat column. */
+.scroll-slim {
+  scrollbar-width: thin;
+  scrollbar-color: #2a303c transparent;
+}
+.scroll-slim::-webkit-scrollbar {
+  width: 8px;
+}
+.scroll-slim::-webkit-scrollbar-thumb {
+  background-color: #2a303c;
+  border-radius: 8px;
+}
+
+/* Motion is one orchestrated moment; honour the OS setting (§16.2). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
