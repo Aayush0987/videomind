@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     MLFLOW_ENABLED: bool = True
     MLFLOW_TRACKING_URI: str = "file:./data/mlruns"
 
+    # --- Enrichment ---
+    SEARCH_PROVIDER: Literal["wikipedia", "tavily", "none"] = "wikipedia"
+
     # --- Server ---
     FRONTEND_ORIGIN: str = "http://localhost:3000"
     ANALYZE_RATE_PER_HOUR: int = 20
@@ -73,3 +76,8 @@ MIN_CHAPTER_SECONDS = 45.0
 SEGMENTATION_CHAR_BUDGET = 45_000
 MAX_SEGMENTATION_WINDOWS = 3
 MAX_SEGMENTATION_ATTEMPTS = 2
+TITLING_BATCH_SIZE = 6
+TITLING_CHAR_BUDGET = 6000
+BANNED_TITLE_PREFIXES = ("chapter", "introduction to")
+MAX_ENTITIES = 15
+MAX_ENRICHMENTS = 6

@@ -8,6 +8,7 @@ from app.agents.segmentation import build_chapters, detect_candidates, propose_b
 from app.core.llm import LLMConfig
 from app.schemas.chapters import ProposedBoundary, SegmentationOutput
 from app.schemas.transcript import SentenceUnit
+
 from fakes.fake_llm import FakeLLM
 
 
