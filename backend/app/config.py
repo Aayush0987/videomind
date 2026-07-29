@@ -1,0 +1,137 @@
+"""Application settings, loaded from environment variables (§19).
+
+Nothing else in the codebase reads `os.environ` directly — every value
+flows through the `Settings` singleton defined here. Tuning constants
+(chunking thresholds, MMR lambda, etc.) are added to this module by the
+phase that introduces them; none exist yet.
+"""
+
+from typing import Literal
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    # --- LLM ---
+    DEFAULT_LLM_PROVIDER: Literal["gemini", "openai", "anthropic", "custom"] = "gemini"
+    DEFAULT_LLM_MODEL: str = "gemini-2.5-flash"
+    GEMINI_API_KEY: str | None = None
+    OPENAI_API_KEY: str | None = None
+    ANTHROPIC_API_KEY: str | None = None
+    CUSTOM_LLM_BASE_URL: str | None = None
+
+    # --- Rate limits ---
+    GEMINI_RPM: int = 10
+    GEMINI_RPD: int = 1000
+    OPENAI_RPM: int = 60
+    ANTHROPIC_RPM: int = 50
+    CUSTOM_RPM: int = 60
+
+    # --- YouTube ---
+    YOUTUBE_API_KEY: str | None = None
+    YTDLP_COOKIES_FILE: str | None = None
+    YTDLP_PROXY: str | None = None
+
+    # --- Transcription ---
+    ENABLE_WHISPER: bool = True
+    WHISPER_MODEL: str = "base"
+    MAX_VIDEO_DURATION: int = 5400
+
+    # --- Embeddings ---
+    EMBEDDING_BACKEND: Literal["gemini", "sentence_transformers"] = "gemini"
+    EMBEDDING_MODEL: str = "gemini-embedding-001"
+    EMBEDDING_DIM: int = 768
+    EMBEDDING_BATCH_SIZE: int = 64
+    GEMINI_EMBED_RPM: int = 100
+
+    # --- Storage ---
+    DATA_DIR: str = "./data"
+
+    # --- Observability ---
+    MLFLOW_ENABLED: bool = True
+    MLFLOW_TRACKING_URI: str = "file:./data/mlruns"
+
+    # --- Enrichment ---
+    SEARCH_PROVIDER: Literal["wikipedia", "tavily", "none"] = "wikipedia"
+
+    # --- Server ---
+    FRONTEND_ORIGIN: str = "http://localhost:3000"
+    ANALYZE_RATE_PER_HOUR: int = 20
+    LOG_LEVEL: str = "INFO"
+
+
+settings = Settings()
+
+# --- Tuning constants (code-level, not environment-configurable; bump in
+# code review, not via .env) ---
+APP_VERSION = "1.0.0"
+MAX_CONCURRENT_JOBS = 1  # §15 — one Whisper job at a time on a free-tier box.
+CURRENT_ANALYSIS_VERSION = 1
+UNIT_MAX_SECONDS = 15.0
+UNIT_MAX_CHARS = 350
+CHUNK_MAX_CHARS = 900
+CHUNK_OVERLAP_UNITS = 1
+MMR_LAMBDA = 0.7
+MIN_CHAPTER_SECONDS = 45.0
+SEGMENTATION_CHAR_BUDGET = 45_000
+MAX_SEGMENTATION_WINDOWS = 3
+MAX_SEGMENTATION_ATTEMPTS = 2
+TITLING_BATCH_SIZE = 6
+TITLING_CHAR_BUDGET = 6000
+BANNED_TITLE_PREFIXES = ("chapter", "introduction to")
+MAX_ENTITIES = 15
+MAX_ENRICHMENTS = 6
+
+# --- Q&A / retrieval (§13) ---
+RELEVANCE_THRESHOLD = 0.6
+MIN_RELEVANT_CHUNKS = 2
+MAX_RETRIEVAL_ATTEMPTS = 2
+QA_HISTORY_TURNS = 6
+# Retry escalation ladder (§13.3): attempt -> (strategy, top_k). A retry that
+# changes nothing is not a corrective-RAG loop; this table makes each pass
+# different. Attempts beyond the last row clamp to it.
+RETRIEVAL_ESCALATION: dict[int, tuple[str, int]] = {
+    0: ("direct", 8),
+    1: ("decompose", 12),
+    2: ("keyword", 16),
+}
+# §13.6 — the honest-failure message returned by the insufficient node.
+INSUFFICIENT_MESSAGE = "I couldn't find that in this video."
+INSUFFICIENT_SUGGESTION_PREFIX = "The closest topics covered are:"
+# §13.5.5 — prepended when zero citations survive validation.
+LOW_CONFIDENCE_HEDGE = (
+    "I couldn't ground this answer in specific passages, so treat it with caution:"
+)
+
+# §15 — recorded on any job left `running`/`queued` by a mid-job restart.
+INTERRUPTED_MESSAGE = "Processing was interrupted. Try again."
+
+# Per-stage progress weights (§10.3). Sum to 1.0; each analysis-graph node's
+# first action reports `jobs.update(job_id, stage=<name>, progress=cumulative)`.
+STAGE_WEIGHTS: dict[str, float] = {
+    "resolve_source": 0.05,
+    "fetch_transcript": 0.30,
+    "normalize": 0.05,
+    "propose_boundaries": 0.20,
+    "verify_repair": 0.05,
+    "title_and_summarize": 0.20,
+    "entities": 0.05,
+    "enrich": 0.05,
+    "index": 0.05,
+}
+
+# §14.2/§16.4 — user-facing label for each stage, shown in the processing
+# timeline while a job polls. Keyed to STAGE_WEIGHTS.
+STAGE_LABELS: dict[str, str] = {
+    "resolve_source": "Resolving video",
+    "fetch_transcript": "Fetching transcript",
+    "normalize": "Normalizing transcript",
+    "propose_boundaries": "Detecting chapter boundaries",
+    "verify_repair": "Verifying chapters",
+    "title_and_summarize": "Writing chapter summaries",
+    "entities": "Extracting key entities",
+    "enrich": "Adding background notes",
+    "index": "Indexing for search",
+}

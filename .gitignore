@@ -1,0 +1,24 @@
+# --- Secrets & runtime data (never commit) ---
+.env
+data/
+*.sqlite3
+mlruns/
+cookies.txt
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+
+# --- Node / frontend ---
+node_modules/
+.next/
+
+# --- OS ---
+.DS_Store

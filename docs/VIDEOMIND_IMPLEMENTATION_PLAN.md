@@ -228,6 +228,7 @@ videomind/
 │       │   └── llm_responses.json
 │       ├── fakes/
 │       │   └── fake_llm.py
+│       ├── test_imports.py
 │       ├── test_llm_adapter.py
 │       ├── test_ratelimit.py
 │       ├── test_normalize.py
@@ -1108,7 +1109,7 @@ Copy under the key field: *"Your key is sent with each request and used only for
 
 ## 18. Testing strategy
 
-Framework: `pytest` + `pytest-asyncio` + `hypothesis`. Target: **every deterministic component is tested exhaustively; every LLM component is tested against a fake.**
+Framework: `pytest` + `pytest-asyncio` + `hypothesis`. Set `addopts = "--strict-markers"` in `pyproject.toml`; do **not** configure anything that masks pytest's exit code 5, because an accidentally-empty test run should fail loudly rather than look like a pass. Target: **every deterministic component is tested exhaustively; every LLM component is tested against a fake.**
 
 ### 18.1 The fake LLM adapter (build this in Phase 1 — everything depends on it)
 
@@ -1228,6 +1229,8 @@ Rules:
 
 Branch protection on `main`: require both workflows green.
 
+> **The default branch must be named `main`.** Both workflows trigger on pushes to `main`, so a repo left on `git init`'s default `master` will never run CI — and it fails silently, with no error anywhere, just an Actions tab that stays empty. Run `git branch -M main` before the first push and confirm the branch name in the GitHub UI.
+
 ---
 
 ## 21. Deployment
@@ -1278,7 +1281,9 @@ Ten phases. Each ends with a commit and a passing verify command. **Do not proce
 
 ### Phase 0 — Scaffold
 Monorepo layout per §4 (empty modules with docstrings are fine), `pyproject.toml` with pinned deps, `ruff.toml`, `.env.example`, `.gitignore`, both CI workflows, `Makefile` (`make dev`, `make test`, `make lint`, `make mlflow`), `docker-compose.yml`, README skeleton, `docs/DECISIONS.md` seeded with three entries: one embedding backend everywhere (§12.2), the 768-dimension lock (§12.2.1), and reranking deferred out of V1 (§25.2).
-**DoD:** `make lint && make test` passes with zero tests. CI green on the first push.
+Also create `backend/tests/test_imports.py` with a single smoke test asserting that `app.config` imports cleanly and `Settings()` loads. **Phase 0 must not end with an empty test suite** — `pytest` exits with code **5** when it collects zero tests, which breaks the `&&` verify chain and turns CI red on the first push. One real test also catches a broken `config.py` immediately instead of in Phase 1.
+
+**DoD:** `make lint && make test` passes with exactly one collected test. CI green on the first push. The default branch is `main` (§20).
 **Verify:** `make lint && pytest backend/tests -q`
 
 ### Phase 1 — LLM adapter + rate limiter + fakes
