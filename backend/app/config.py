@@ -82,6 +82,27 @@ BANNED_TITLE_PREFIXES = ("chapter", "introduction to")
 MAX_ENTITIES = 15
 MAX_ENRICHMENTS = 6
 
+# --- Q&A / retrieval (§13) ---
+RELEVANCE_THRESHOLD = 0.6
+MIN_RELEVANT_CHUNKS = 2
+MAX_RETRIEVAL_ATTEMPTS = 2
+QA_HISTORY_TURNS = 6
+# Retry escalation ladder (§13.3): attempt -> (strategy, top_k). A retry that
+# changes nothing is not a corrective-RAG loop; this table makes each pass
+# different. Attempts beyond the last row clamp to it.
+RETRIEVAL_ESCALATION: dict[int, tuple[str, int]] = {
+    0: ("direct", 8),
+    1: ("decompose", 12),
+    2: ("keyword", 16),
+}
+# §13.6 — the honest-failure message returned by the insufficient node.
+INSUFFICIENT_MESSAGE = "I couldn't find that in this video."
+INSUFFICIENT_SUGGESTION_PREFIX = "The closest topics covered are:"
+# §13.5.5 — prepended when zero citations survive validation.
+LOW_CONFIDENCE_HEDGE = (
+    "I couldn't ground this answer in specific passages, so treat it with caution:"
+)
+
 # Per-stage progress weights (§10.3). Sum to 1.0; each analysis-graph node's
 # first action reports `jobs.update(job_id, stage=<name>, progress=cumulative)`.
 STAGE_WEIGHTS: dict[str, float] = {

@@ -48,6 +48,7 @@ class RunMetrics:
     segmentation_attempts: int = 0
     verification_issues: int = 0
     chapters_final: int = 0
+    dropped_citations: int = 0
     params: dict[str, Any] = field(default_factory=dict)
     verification_report: VerificationReport | None = None
 
@@ -134,6 +135,7 @@ def _export(mlflow: Any, metrics: RunMetrics) -> None:
     mlflow.log_metric("segmentation_attempts", metrics.segmentation_attempts)
     mlflow.log_metric("verification_issues", metrics.verification_issues)
     mlflow.log_metric("chapters_final", metrics.chapters_final)
+    mlflow.log_metric("dropped_citations", metrics.dropped_citations)
     for node_name, latency_ms in metrics.node_latency_ms.items():
         mlflow.log_metric(f"node.{node_name}.latency_ms", latency_ms)
     mlflow.log_text("\n".join(metrics.node_path), "node_path.txt")
