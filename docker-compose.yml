@@ -1,6 +1,6 @@
-# Declarative topology for local development (§21.1). The backend and
-# frontend Dockerfiles are Phase 10 / Phase 9 deliverables respectively —
-# this file is not buildable until those land.
+# Declarative topology for local development (§21.1). Backend and frontend
+# each ship a Dockerfile; `docker compose up` needs only a populated .env
+# (copy .env.example first).
 services:
   backend:
     build:

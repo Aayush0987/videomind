@@ -1,0 +1,15 @@
+# Keep the build context small so the image carries only source + base deps.
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+tests/
+# The live local database and Chroma store — never bake these in. The seeded
+# demo cache under data/seed/ is the one thing we DO want copied, so it is not
+# excluded here.
+data/*.sqlite3
+data/chroma/
+data/mlruns/

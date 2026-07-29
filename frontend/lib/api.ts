@@ -17,7 +17,8 @@ import type {
 } from "./types";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
+  "http://localhost:8000";
 
 // A thrown ApiError carries the backend's error envelope so the UI can show a
 // safe, specific message and branch on the machine-readable code (§14.1).
