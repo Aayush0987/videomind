@@ -46,7 +46,7 @@ _FENCE_RE = re.compile(r"^```(?:json)?\s*\n?(.*?)\n?```$", re.DOTALL)
 
 class LLMConfig(BaseModel):
     provider: Literal["gemini", "openai", "anthropic", "custom"] = "gemini"
-    model: str = "gemini-2.5-flash"
+    model: str = "gemini-3.6-flash"
     api_key: str | None = None  # NEVER logged, NEVER persisted, NEVER echoed
     base_url: str | None = None
     temperature: float = 0.0

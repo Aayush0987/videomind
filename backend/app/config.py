@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     # --- LLM ---
     DEFAULT_LLM_PROVIDER: Literal["gemini", "openai", "anthropic", "custom"] = "gemini"
-    DEFAULT_LLM_MODEL: str = "gemini-2.5-flash"
+    DEFAULT_LLM_MODEL: str = "gemini-3.6-flash"
     GEMINI_API_KEY: str | None = None
     OPENAI_API_KEY: str | None = None
     ANTHROPIC_API_KEY: str | None = None

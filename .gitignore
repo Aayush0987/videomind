@@ -22,3 +22,7 @@ node_modules/
 
 # --- OS ---
 .DS_Store
+
+# --- Build artifacts ---
+*.tsbuildinfo
+test-results/

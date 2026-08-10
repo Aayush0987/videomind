@@ -4,42 +4,37 @@
 interrogate in natural language, with every answer citing a clickable
 timestamp.**
 
-<!-- Record after Phase 9: paste → chapters → question → citation seek. 30s, no
-narration. Drop the file at docs/demo.gif and it renders here. -->
-![VideoMind demo](docs/demo.gif)
+## What it does
 
-## Live demo
+1. You paste a YouTube URL.
+2. The backend fetches the transcript (captions, or local Whisper as a
+   fallback), splits it into topic-based chapters, titles and summarises
+   each one, and indexes the whole thing for retrieval.
+3. You get a chapter rail synced to the video player — click a chapter,
+   the player seeks there.
+4. You ask questions about the video in a chat panel. Every answer cites
+   the exact timestamp it came from; click the citation, the player jumps
+   there.
 
-<!-- Add the Vercel URL once deployed. -->
-**Try it:** _add live demo link_
+## Why it's built the way it is
 
-> First request after idle may take ~50s while the free-tier backend wakes.
-> The landing page pings `GET /api/health` on mount and shows "Waking the
-> server…" if it's slow. The deployed demo ships three pre-baked videos, so it
-> works even when YouTube blocks the host IP.
+Most portfolio RAG projects are a single chain: prompt in, text out.
+VideoMind is built around three theses instead.
 
-## What makes it interesting
-
-Most portfolio RAG projects are a chain: prompt in, text out. VideoMind is built
-around three theses instead.
-
-1. **LLMs propose, deterministic Python disposes.** Every LLM stage is followed
-   by a non-LLM validator that can reject its output. A twelve-rule verifier
-   catches bad chapter boundaries; a citation validator strips any timestamp the
-   model didn't actually retrieve. No LLM is ever trusted to produce a correct
-   timestamp.
+1. **LLMs propose, deterministic Python disposes.** Every LLM stage is
+   followed by a non-LLM validator that can reject its output. A
+   twelve-rule verifier catches bad chapter boundaries; a citation
+   validator strips any timestamp the model didn't actually retrieve. No
+   LLM is ever trusted to produce a correct timestamp.
 2. **The graph is a state machine, not a chain.** Conditional edges —
-   skip-enrichment, repair-loop, retrieval-retry — mean two different videos
-   take two different paths through the same LangGraph. The retry you see in the
-   processing timeline is a real edge firing, not a spinner.
-3. **The provider is a runtime parameter, not a build-time dependency.** No
-   agent imports `openai`, `google.generativeai`, or `anthropic`. There is one
-   seam (`core/llm.py`, the only file allowed to import `litellm`), so switching
-   from Gemini to OpenAI in the Settings drawer changes which API is called with
-   zero code changes.
-
-The full LangGraph diagram lives in
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+   skip-enrichment, repair-loop, retrieval-retry — mean two different
+   videos take two different paths through the same LangGraph. A retry
+   shown in the processing timeline is a real edge firing, not a spinner.
+3. **The provider is a runtime parameter, not a build-time dependency.**
+   No agent imports `openai`, `google.generativeai`, or `anthropic`. There
+   is one seam (`backend/app/core/llm.py`, the only file allowed to import
+   `litellm`), so switching from Gemini to OpenAI in the Settings drawer
+   changes which API is called with zero code changes.
 
 ## How it works
 
@@ -57,27 +52,59 @@ flowchart LR
     K --> L[Answer + clickable citations]
 ```
 
-Nine agents, each making exactly one decision. Two of them are deterministic and
-exist to catch the other seven:
+```mermaid
+flowchart TB
+    subgraph FE["Frontend — Next.js"]
+        UI1[Paste URL]
+        UI2[Player + Chapter rail]
+        UI3[Q&A panel]
+        UI4[Settings drawer<br/>provider / key / base URL / model]
+    end
 
-| Agent | The one decision it makes |
-|---|---|
-| `segmentation` | Where do the topic boundaries fall? |
-| `verification` *(deterministic)* | Are these chapters structurally valid? |
-| `titling` | What is each chapter called and summarised? |
-| `entities` | Which named entities deserve a background note? |
-| `enrichment` | What blurb + source for each entity? |
-| `query_planner` | How should this question be searched — and how hard? |
-| `grader` | Is the retrieved context sufficient to answer? |
-| `answerer` | What is the grounded answer, with citation markers? |
-| `validate_citations` *(deterministic)* | Does every cited timestamp actually exist? |
+    subgraph BE["Backend — FastAPI"]
+        API[REST API layer]
+        JOBS[In-process job runner<br/>+ SQLite job table]
+        AG[Analysis graph — LangGraph]
+        QG[Q&A graph — LangGraph]
+        LLM[LLM adapter — litellm<br/>+ rate-limit guard]
+        EMB[Embedder — gemini-embedding-001]
+    end
 
-## The deterministic layer
+    subgraph ST["Local state"]
+        SQL[(SQLite<br/>videos, chapters,<br/>transcripts, jobs)]
+        CHR[(Chroma<br/>transcript chunks)]
+        MLF[(MLflow<br/>run traces)]
+    end
 
-`agents/verification.py` runs twelve rules over proposed chapters and imports
-nothing from the LLM adapter — a test enforces that boundary. Repairs apply in
-rule order; if repair still fails, the graph re-segments **once**, never in an
-unbounded loop.
+    UI1 --> API --> JOBS --> AG
+    UI3 --> API --> QG
+    AG --> LLM --> EMB --> CHR
+    JOBS --> SQL
+    AG -.traces.-> MLF
+    QG -.traces.-> MLF
+```
+
+Nine agents, each making exactly one decision. Two of them are
+deterministic and exist to catch the other seven:
+
+| Agent | The one decision it makes | Kind |
+|---|---|---|
+| `segmentation` | Where do the topic boundaries fall? | LLM + deterministic candidates |
+| `verification` | Are these chapters structurally valid (R1–R12)? | **Deterministic** |
+| `titling` | What is each chapter called and summarised? | LLM |
+| `entities` | Which named entities deserve a background note? | LLM |
+| `enrichment` | What blurb + source for each entity? | LLM + Wikipedia |
+| `query_planner` | How should this question be searched — and how hard? | LLM |
+| `grader` | Is the retrieved context sufficient to answer? | LLM |
+| `answerer` | What is the grounded answer, with citation markers? | LLM |
+| `validate_citations` | Does every cited timestamp actually exist? | **Deterministic** |
+
+### The deterministic layer
+
+`backend/app/agents/verification.py` runs twelve rules over proposed
+chapters and imports nothing from the LLM adapter — a test enforces that
+boundary. Repairs apply in rule order; if repair still fails, the graph
+re-segments **once**, never in an unbounded loop.
 
 | Rule | Check | Auto-repair |
 |---|---|---|
@@ -88,97 +115,137 @@ unbounded loop.
 | R9 | `3 ≤ n ≤ 25` chapters | merge / re-segment |
 | R10 | title ≤ 80 chars, unique | truncate / disambiguate |
 
-_(Abridged — all twelve are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).)_
+The strongest claim in the project is a **Hypothesis property test**: for
+*any* list of random floats read as chapter boundaries,
+`build_chapters → repair_chapters → verify_chapters` produces either a
+valid set or a report whose only remaining issues are warnings.
+Structural validity is proven, not hoped for.
 
-The strongest claim in the project is a **Hypothesis property test**: for *any*
-list of random floats read as chapter boundaries,
-`build_chapters → repair_chapters → verify_chapters` produces either a valid set
-or a report whose only remaining issues are warnings. Structural validity is
-proven, not hoped for.
+### Provider-agnostic by design
 
-## Provider-agnostic by design
+The Settings drawer has four fields — **provider, model, API key, base
+URL** — and nothing else. Switching provider changes which API `litellm`
+calls at runtime; no agent imports a provider SDK, so there is nothing to
+recompile. Your key is sent with each request and used only for that
+request — it is never stored on the server.
 
-The Settings drawer has four fields — **provider, model, API key, base URL** —
-and nothing else. Switching provider changes which API `litellm` calls at
-runtime; no agent imports a provider SDK, so there is nothing to recompile.
+### Persistence
 
-<!-- Screenshot the Settings drawer and drop it at docs/settings.png. -->
-![Settings drawer](docs/settings.png)
+- **SQLite** (`$DATA_DIR/videomind.sqlite3`) holds videos, transcripts,
+  chapters, enrichments, and the job table.
+- **Chroma** (`$DATA_DIR/chroma`) holds transcript chunks in a
+  model-scoped collection (`chunks__gemini_embedding_001_768`). The
+  collection name encodes the embedding model and dimension, so an index
+  built at a different dimension can never be silently queried against.
+- **One embedding space, everywhere.** `gemini-embedding-001` at 768
+  dimensions runs locally and in production. Vectors are re-normalised to
+  unit norm after MRL truncation.
 
-> Your key is sent with each request and used only for that request. It is never
-> stored on the server — the code in the LLM adapter makes that literally true.
+## Project layout
 
-## Run it locally
+```
+backend/    FastAPI app — agents/, graphs/ (LangGraph), core/ (llm, embedder,
+            db, vectorstore), ingestion/ (YouTube, captions, Whisper),
+            schemas/, prompts/ (*.md), tests/
+frontend/   Next.js app — player, chapter rail, chat panel, settings drawer
+docker-compose.yml   backend + frontend, one populated .env
+```
+
+## Setup
+
+### 1. Prerequisites
+
+- Python 3.11, Node 18+
+- `ffmpeg` on your PATH (for local Whisper transcription fallback)
+- A free Gemini API key (see below) — this is the only credential you
+  actually need
+
+### 2. Get a free Gemini API key
+
+Gemini powers **both** the LLM and the embeddings — one key, one backend,
+everywhere.
+
+1. Go to **[aistudio.google.com/apikey](https://aistudio.google.com/apikey)**
+   and sign in with a Google account.
+2. Click **Create API key**. No billing account or credit card required.
+3. Copy the key.
+
+### 3. (Optional) Get a free YouTube Data API key
+
+Not required — without it, the app falls back to scraping video metadata
+via `yt-dlp`, which works fine for most videos. Add a real key only if
+you want more reliable metadata:
+
+1. Go to **[console.cloud.google.com](https://console.cloud.google.com)**,
+   create (or reuse) a project.
+2. **APIs & Services → Library** → search **YouTube Data API v3** →
+   **Enable**.
+3. **APIs & Services → Credentials → Create Credentials → API key**.
+   Free, no billing required.
+4. (Recommended) Restrict the key to YouTube Data API v3 only.
+
+### 4. Configure and run
 
 ```bash
-cp .env.example .env          # then add your GEMINI_API_KEY
+cp .env.example .env
+# edit .env: set GEMINI_API_KEY (required), YOUTUBE_API_KEY (optional)
+
 docker compose up
 ```
 
 That brings up the backend on `:8000` and the frontend on `:3000` with no
 further steps. Open <http://localhost:3000>, paste a link, and go.
 
-**Offline transcription (Whisper)** is available locally but **off in the hosted
-demo** (`ENABLE_WHISPER=false`). Free-tier RAM can't run `faster-whisper` without
-OOMing, so the hosted demo relies on YouTube captions and the seeded cache;
-running VideoMind locally unlocks Whisper for videos that have no captions.
-
-**Pre-bake the demo cache** (optional, recommended before a live demo):
+**Running without Docker:**
 
 ```bash
-python backend/scripts/seed_demo_cache.py <url> <url> <url>
+# terminal 1 — backend
+python -m venv .venv && source .venv/bin/activate
+pip install -e "backend[dev]"
+make dev            # http://localhost:8000
+
+# terminal 2 — frontend
+cd frontend && npm install
+npm run dev          # http://localhost:3000
 ```
 
-This processes the videos locally — where YouTube fetching works — into
-`backend/data/seed/`. Because local and production share one embedding backend,
-the Docker image copies that directory into `DATA_DIR` on first boot, so the
-deployed demo always has working videos regardless of network conditions.
+> If you edit `.env` while the backend is running, **restart it**.
+> Settings are loaded once at process startup — `--reload` watches `.py`
+> files, not `.env`.
 
-## Architecture decisions
+**Offline transcription (Whisper)** runs locally as a fallback for videos
+with no captions (`ENABLE_WHISPER=true` by default). Set it to `false` in
+any low-memory / production deployment — `faster-whisper` needs more RAM
+than most free-tier hosts provide.
 
-The append-only decision log is [`docs/DECISIONS.md`](docs/DECISIONS.md). The
-three that shape everything else:
+## Commands
 
-- **One embedding backend, everywhere.** `gemini-embedding-001` runs locally and
-  in production — there is no second vector space to keep in sync, which is what
-  lets a single seed run produce artefacts valid in both places.
-- **768 dimensions, locked at index time.** The collection name encodes model
-  and dimension (`chunks__gemini_embedding_001_768`), so an index built at a
-  different dimension is a cache miss, not a silent quality collapse.
-- **Repair before retry.** A deterministic repair pass fixes bad boundaries
-  without an LLM call; only if repair fails does the graph spend a second
-  segmentation prompt. Cheap correctness first, expensive correctness last.
+- `make dev`    — run the backend locally
+- `make test`   — pytest (backend test suite)
+- `make lint`   — ruff check + format check
+- `make mlflow` — open the local MLflow UI (traces for every graph run)
 
 ## Known limitations
 
 Listing these is a credibility signal, not an apology.
 
-- **Single-instance job runner.** Jobs run in-process behind one semaphore.
-  Scaling past one backend replica needs a real queue (Redis + worker); that's a
-  deliberate V1 trade-off.
+- **Single-instance job runner.** Jobs run in-process behind one
+  semaphore. Scaling past one backend replica needs a real queue (Redis +
+  worker) — a deliberate V1 trade-off.
 - **YouTube IP blocking.** A deployed host can be blocked from fetching
-  captions/audio. Mitigated by `YTDLP_COOKIES_FILE` / `YTDLP_PROXY` support and
-  the pre-baked seed cache.
-- **Free-tier cold starts.** ~50s on first request after idle; the frontend
-  warms the backend on landing-page mount.
+  captions/audio. Mitigated by `YTDLP_COOKIES_FILE` / `YTDLP_PROXY`
+  support and a pre-baked seed cache (`backend/scripts/seed_demo_cache.py`).
+- **Free-tier cold starts.** ~50s on first request after idle on a
+  free-tier host; the frontend warms the backend on landing-page mount.
 - **English-only** transcription and answers.
 - **Single-video Q&A** — no cross-video or per-channel search.
 
 ## Roadmap
-
-Deferred to keep V1 honest (full list in the plan's §25):
 
 - Multi-source ingestion (Vimeo, direct upload, local file)
 - Cross-video search and a per-channel knowledge base
 - Multi-language transcription and answer-language selection
 - Streaming answers (SSE) — the API shape already allows it
 - A real job queue (Redis + worker) for horizontal scaling
-- An evaluation harness: 20 labelled questions across 5 videos, scored for
-  citation precision and answer groundedness, tracked in MLflow across prompt
-  versions. This is the highest-value follow-up — it turns "I built it" into
-  "I measured it."
-
----
-
-Build spec: [`docs/VIDEOMIND_IMPLEMENTATION_PLAN.md`](docs/VIDEOMIND_IMPLEMENTATION_PLAN.md).
-Commands: `make dev`, `make test`, `make lint`, `make mlflow`.
+- An evaluation harness: labelled questions scored for citation precision
+  and answer groundedness, tracked in MLflow across prompt versions
