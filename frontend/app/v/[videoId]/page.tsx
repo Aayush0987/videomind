@@ -32,7 +32,7 @@ function Workspace() {
   const playerRef = useRef<VideoPlayerHandle>(null);
   const railRef = useRef<ChapterRailHandle>(null);
 
-  // Poll the job until it resolves; stop the moment it's ready or failed (§15).
+  // Poll the job until it resolves; stop the moment it's ready or failed.
   const jobQuery = useQuery({
     queryKey: ["job", jobId],
     queryFn: () => getJob(jobId as string),
@@ -166,7 +166,7 @@ function Workspace() {
             {rail}
           </div>
 
-          {/* Mobile tab switcher (§16.1). */}
+          {/* Mobile tab switcher. */}
           <div className="lg:hidden">
             <div
               role="tablist"

@@ -1,4 +1,4 @@
-"""Tests for app.ingestion.normalize (§9.4). Verified against two fixtures:
+"""Tests for app.ingestion.normalize. Verified against two fixtures:
 `transcript_short.json` (clean punctuation) and `transcript_long.json`
 (45 min of auto-caption-style cues with zero terminal punctuation and
 rolling-overlap duplication -- the hard case)."""
@@ -39,7 +39,7 @@ def test_short_fixture_strips_brackets_and_speaker_markers() -> None:
 
 def test_short_fixture_units_are_sequentially_indexed_and_ordered() -> None:
     """Starts are monotonically non-decreasing; ends are *not* asserted
-    non-overlapping here since the 0.5s minimum-duration clamp (§9.4 step 1)
+    non-overlapping here since the 0.5s minimum-duration clamp
     can push a short cue's end past the next cue's start."""
     cues = _load_cues("transcript_short.json")
     units = normalize(cues)

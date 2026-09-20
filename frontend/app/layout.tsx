@@ -4,7 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 // Condensed grotesque for chapter titles + timecodes; a comfortable humanist
-// sans for summaries and answers (§16.2).
+// sans for summaries and answers.
 const condensed = Saira_Condensed({
   subsets: ["latin"],
   weight: ["500", "600", "700"],

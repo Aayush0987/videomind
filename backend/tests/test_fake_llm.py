@@ -1,4 +1,4 @@
-"""Tests for tests/fakes/fake_llm.py (§18.1). FakeLLM never touches the
+"""Tests for tests/fakes/fake_llm.py. FakeLLM never touches the
 network -- it's the double every later phase's agent tests inject in place
 of app.core.llm.generate/generate_structured.
 """

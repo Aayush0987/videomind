@@ -28,7 +28,8 @@ jobs:
         run: ruff format --check backend
 
       - name: Mypy
-        run: mypy backend/app/core backend/app/agents backend/app/graphs
+        working-directory: backend
+        run: mypy app/core app/agents app/graphs
 
       - name: Pytest
         run: pytest backend/tests -q --maxfail=1

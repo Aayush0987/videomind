@@ -1,4 +1,4 @@
-"""Health check endpoint, used by the frontend to warm the backend (§21.2 D4)."""
+"""Health check endpoint, used by the frontend to warm the backend."""
 
 from fastapi import APIRouter
 

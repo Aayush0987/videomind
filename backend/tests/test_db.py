@@ -1,4 +1,4 @@
-"""Tests for app.core.db (§5): schema init, row upsert/get roundtrips."""
+"""Tests for app.core.db: schema init, row upsert/get roundtrips."""
 
 from pathlib import Path
 

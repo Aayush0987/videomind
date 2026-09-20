@@ -1,4 +1,4 @@
-"""Tests for agents/verification.py — one test per rule R1–R12 + hypothesis property (§11.3)."""
+"""Tests for agents/verification.py — one test per rule R1–R12 + hypothesis property."""
 
 import hypothesis.strategies as st
 from app.agents.segmentation import build_chapters
@@ -264,7 +264,7 @@ def test_valid_chapters_pass() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Hypothesis property test (§11.3)
+# Hypothesis property test
 # ---------------------------------------------------------------------------
 
 
@@ -282,7 +282,7 @@ def test_repair_always_produces_valid_or_warning_only(
 ) -> None:
     """For any random boundaries, build → repair → verify yields no errors.
 
-    This is the strongest correctness claim in the project (§11.3).
+    This is the strongest correctness claim in the project.
     """
     # Filter to values within [0, duration] and deduplicate
     boundaries = sorted({b for b in raw_boundaries if 0.0 <= b <= duration})

@@ -1,6 +1,6 @@
-"""Q&A query planning agent: expands a user question into retrieval sub-queries (§13).
+"""Q&A query planning agent: expands a user question into retrieval sub-queries.
 
-The escalation ladder (§13.3) is deterministic: the calling graph passes the
+The escalation ladder is deterministic: the calling graph passes the
 current attempt index and this agent picks the strategy and ``top_k`` from
 ``RETRIEVAL_ESCALATION`` — not the model. The LLM does only the linguistic work
 (resolve references, decompose, write a HyDE paragraph, or extract keywords),
@@ -54,7 +54,7 @@ async def plan_query(
     *,
     missing_information: str | None = None,
 ) -> QueryPlan:
-    """Plan retrieval for one pass, escalating strategy by ``attempt`` (§13.3)."""
+    """Plan retrieval for one pass, escalating strategy by ``attempt``."""
     strategy, top_k = RETRIEVAL_ESCALATION[min(attempt, _MAX_ATTEMPT)]
     template = load_prompt("query_planner")
     prompt = template.format(

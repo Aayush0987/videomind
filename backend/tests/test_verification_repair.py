@@ -1,4 +1,4 @@
-"""Tests for the repair policy in agents/verification.py (§11.2)."""
+"""Tests for the repair policy in agents/verification.py."""
 
 from app.agents.verification import repair_chapters, verify_chapters
 from app.schemas.chapters import Chapter

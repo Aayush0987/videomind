@@ -1,4 +1,4 @@
-"""Deterministic cues -> sentence units normalization, no LLM involved (§9.4)."""
+"""Deterministic cues -> sentence units normalization, no LLM involved."""
 
 import re
 

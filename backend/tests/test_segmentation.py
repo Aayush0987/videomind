@@ -1,4 +1,4 @@
-"""Tests for agents/segmentation.py (§10.4, §18.2)."""
+"""Tests for agents/segmentation.py."""
 
 import ast
 import inspect

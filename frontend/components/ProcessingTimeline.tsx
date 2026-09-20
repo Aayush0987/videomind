@@ -2,7 +2,7 @@
 
 import type { JobResponse } from "@/lib/types";
 
-// Mirrors STAGE_WEIGHTS / STAGE_LABELS in backend app/config.py (§10.3, §16.4).
+// Mirrors STAGE_WEIGHTS / STAGE_LABELS in backend app/config.py.
 // The frontend can't import backend Python, so the ordered stage list lives
 // here; the job poll drives which one is active.
 const STAGES: { name: string; label: string }[] = [
@@ -104,7 +104,7 @@ export function ProcessingTimeline({ job }: { job: JobResponse }) {
                   {stage.label}
                 </p>
                 {/* The retry is the most interesting thing the system does —
-                    surface it, never hide it (§16.4). */}
+                    surface it, never hide it. */}
                 {showRetry && (
                   <p className="mt-1 text-xs text-citation">
                     Chapters failed validation — re-segmenting

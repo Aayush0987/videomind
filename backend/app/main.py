@@ -1,8 +1,8 @@
 """FastAPI application entrypoint: app instance, routers, and lifespan.
 
 The lifespan handler performs schema init, embedder warm-up, and stale-job
-cleanup on startup (§8.2), and configures CORS and the per-IP analyze rate
-limiter (§14, §15).
+cleanup on startup, and configures CORS and the per-IP analyze rate
+limiter.
 """
 
 import uuid
@@ -21,9 +21,9 @@ from app.core.errors import VideoMindError
 from app.schemas.api import ErrorResponse
 from app.services import jobs
 
-_MAX_BODY_BYTES = 32 * 1024  # §14.3 — 32 KB request cap.
+_MAX_BODY_BYTES = 32 * 1024  # 32 KB request cap.
 
-# error_code → HTTP status (§14.1). Anything unmapped is a 500.
+# error_code → HTTP status. Anything unmapped is a 500.
 _STATUS_BY_CODE: dict[str, int] = {
     "invalid_url": 400,
     "video_too_long": 400,
@@ -52,7 +52,7 @@ async def lifespan(app: FastAPI):
 
 class RequestContextMiddleware(BaseHTTPMiddleware):
     """Enforce the body-size cap and stamp every response with an X-Request-ID
-    (the same id is the MLflow run tag, §14.3)."""
+    (the same id is the MLflow run tag)."""
 
     async def dispatch(self, request: Request, call_next):
         content_length = request.headers.get("content-length")

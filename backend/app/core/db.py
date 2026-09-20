@@ -1,4 +1,4 @@
-"""sqlite3 connection, schema init, and typed row helpers (§5)."""
+"""sqlite3 connection, schema init, and typed row helpers."""
 
 import json
 import sqlite3

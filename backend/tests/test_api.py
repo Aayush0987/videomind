@@ -1,9 +1,9 @@
-"""Tests for the HTTP API surface (§14, Phase 8 DoD).
+"""Tests for the HTTP API surface.
 
 `TestClient` happy paths plus the required edges: a cache hit returns 200 with
 zero background scheduling, malformed URLs 400, unknown ids 404, an oversized
 body 413, and the ask endpoint returns a cited answer with its agent trace.
-Every response carries an `X-Request-ID` (§14.3). No test makes a real network
+Every response carries an `X-Request-ID`. No test makes a real network
 or LLM call — the scheduler and the Q&A graph are faked at the boundary.
 """
 

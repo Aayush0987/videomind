@@ -1,4 +1,4 @@
-"""Pydantic models for Q&A: query plans, grading verdicts, and cited answers (§6, §13)."""
+"""Pydantic models for Q&A: query plans, grading verdicts, and cited answers."""
 
 from typing import Literal
 

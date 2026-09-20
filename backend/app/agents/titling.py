@@ -1,4 +1,4 @@
-"""Chapter titling and summarization agent, batched across chapters (§10.5).
+"""Chapter titling and summarization agent, batched across chapters.
 
 One LLM call per batch of ``TITLING_BATCH_SIZE`` chapters keeps token cost flat
 for long videos: 20 chapters cost 4 calls, not 20. Deterministic post-checks

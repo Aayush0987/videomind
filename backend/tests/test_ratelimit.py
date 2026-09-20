@@ -1,4 +1,4 @@
-"""Tests for app.core.ratelimit (§8, §18.2). Always uses a fake clock --
+"""Tests for app.core.ratelimit. Always uses a fake clock --
 never a real `asyncio.sleep`, so this suite runs instantly.
 """
 

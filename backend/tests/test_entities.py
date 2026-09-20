@@ -1,4 +1,4 @@
-"""Tests for agents/entities.py (§10.6)."""
+"""Tests for agents/entities.py."""
 
 import pytest
 from app.agents.entities import extract_entities

@@ -1,4 +1,4 @@
-"""Tests for app.ingestion.youtube.parse_video_id (§9.1). Pure function,
+"""Tests for app.ingestion.youtube.parse_video_id. Pure function,
 no network -- the 12-URL-form table the spec asks for."""
 
 import pytest

@@ -1,4 +1,4 @@
-"""Pydantic models for chapters, `SegmentationOutput`, and `VerificationReport` (§6, §11)."""
+"""Pydantic models for chapters, `SegmentationOutput`, and `VerificationReport`."""
 
 from typing import Literal
 

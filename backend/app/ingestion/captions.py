@@ -1,5 +1,5 @@
 """Transcript acquisition ladder: youtube-transcript-api, then yt-dlp
-subtitle extraction (§9.3, rungs 1-3).
+subtitle extraction (rungs 1-3).
 """
 
 import http.cookiejar
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def fetch_captions(video_id: str, url: str) -> tuple[list[TranscriptCue], str] | None:
-    """Rungs 1-3 of §9.3. Each rung is attempted once; a failure is logged
+    """Rungs 1-3 of the acquisition ladder. Each rung is attempted once; a failure is logged
     with the rung name and the ladder moves down. Returns `None` if all
     three rungs fail, leaving rung 4 (whisper) to the caller.
     """
@@ -43,7 +43,7 @@ def fetch_captions(video_id: str, url: str) -> tuple[list[TranscriptCue], str] |
 
 
 def _build_client() -> YouTubeTranscriptApi:
-    """Wires §21.3's cookies/proxy plumbing into youtube-transcript-api.
+    """Wires the cookies/proxy plumbing into youtube-transcript-api.
     Both are `None`/unset by default, so local behaviour is unchanged.
     """
     proxy_config = None
@@ -82,7 +82,7 @@ def _fetch_by_kind(video_id: str, *, is_generated: bool) -> tuple[list[Transcrip
 
 
 def _select_by_language(candidates: list[Any]) -> Any | None:
-    """Prefer exact `en`, then any `en-*`, then the first available (§9.3)."""
+    """Prefer exact `en`, then any `en-*`, then the first available."""
     if not candidates:
         return None
     for candidate in candidates:

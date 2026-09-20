@@ -1,4 +1,4 @@
-"""Deterministic token-bucket rate-limit guard, keyed per provider/purpose (§8).
+"""Deterministic token-bucket rate-limit guard, keyed per provider/purpose.
 
 A sliding-window limiter that gates calls *before* they're made, not a
 reactive try/except. One `RateLimiter` instance per (provider, model) key,
@@ -66,7 +66,7 @@ class RateLimiter:
 
 
 class IPRateLimiter:
-    """Simple per-IP sliding-window cap on `POST /api/videos` (§14.3) — the
+    """Simple per-IP sliding-window cap on `POST /api/videos` — the
     public demo must not be a free Whisper farm. Synchronous: it gates the
     request handler, it does not block on a slot."""
 

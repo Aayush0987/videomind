@@ -1,4 +1,4 @@
-"""Tests for app.core.llm (§7, §18.2).
+"""Tests for app.core.llm.
 
 No test may make a real network call -- litellm.acompletion is always
 mocked. Tests reference `litellm.acompletion` only via string-based
@@ -147,7 +147,7 @@ async def test_response_format_rejection_falls_back_to_prompt_schema(
     assert any("schema" in content.lower() for content in system_messages)
 
 
-# --- retry semantics (§7.4) -------------------------------------------------
+# --- retry semantics -------------------------------------------------
 
 
 async def test_retries_on_transient_429_then_succeeds(monkeypatch: pytest.MonkeyPatch) -> None:

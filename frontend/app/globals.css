@@ -12,7 +12,7 @@ body {
   color: #eceff4;
 }
 
-/* Timecodes are always tabular so digits don't jitter as they tick (§16.2). */
+/* Timecodes are always tabular so digits don't jitter as they tick. */
 .tabular {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
@@ -38,7 +38,7 @@ body {
   border-radius: 8px;
 }
 
-/* Motion is one orchestrated moment; honour the OS setting (§16.2). */
+/* Motion is one orchestrated moment; honour the OS setting. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -1,4 +1,4 @@
-"""Tests for agents/enrichment.py (§10.6)."""
+"""Tests for agents/enrichment.py."""
 
 import pytest
 from app.agents.enrichment import enrich

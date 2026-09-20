@@ -1,4 +1,4 @@
-"""Tests for graphs/analysis_graph.py (§10.1-10.3, §17, Phase 6 DoD).
+"""Tests for graphs/analysis_graph.py.
 
 The full-pipeline test asserts the node path and that a batched, hybrid run
 stays cheap: `llm_calls_total <= 9`. Repair-before-resegment is exercised by

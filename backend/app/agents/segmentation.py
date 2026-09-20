@@ -1,5 +1,5 @@
 """Topic-boundary segmentation agent: proposes chapter boundaries from unit
-embeddings and LLM refinement (§10.4).
+embeddings and LLM refinement.
 
 Hybrid approach: deterministic candidate detection, then LLM selection.
 """

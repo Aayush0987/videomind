@@ -37,7 +37,7 @@ export function ChatPanel({
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
 
-  // Two example questions, pre-filled from the chapter titles (§16.3).
+  // Two example questions, pre-filled from the chapter titles.
   const examples = useMemo(() => {
     const titles = chapters.map((c) => c.title).filter(Boolean);
     const out: string[] = [];

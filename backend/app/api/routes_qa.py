@@ -1,4 +1,4 @@
-"""Q&A endpoint: runs the Q&A graph and returns cited answers (§13, §14.2)."""
+"""Q&A endpoint: runs the Q&A graph and returns cited answers."""
 
 from fastapi import APIRouter
 
@@ -58,7 +58,7 @@ async def ask(video_id: str, req: AskRequest) -> AskResponse:
 
 @router.post("/llm/ping", response_model=PingResponse)
 async def ping(llm: LLMConfigIn | None = None) -> PingResponse:
-    """One tiny 5-token generate to verify provider connectivity (§16.7)."""
+    """One tiny 5-token generate to verify provider connectivity."""
     cfg = resolve_llm_config(llm).model_copy(update={"max_tokens": 5})
     try:
         await generate("ping", cfg)

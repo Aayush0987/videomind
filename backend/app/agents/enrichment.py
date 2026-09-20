@@ -1,5 +1,5 @@
 """Entity enrichment agent: fetches Wikipedia context for entities flagged
-`needs_enrichment` (§10.6).
+`needs_enrichment`.
 
 Handles at most ``MAX_ENRICHMENTS`` entities, chosen by earliest first mention.
 Each is looked up via the free, keyless Wikipedia REST summary; a 404 or

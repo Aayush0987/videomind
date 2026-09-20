@@ -1,4 +1,4 @@
-// Mirrors the backend Pydantic models in app/schemas/api.py (§14, §15).
+// Mirrors the backend Pydantic models in app/schemas/api.py.
 // Field names are kept snake_case to match the wire format exactly — no
 // transformation layer, so what the API sends is what these types describe.
 

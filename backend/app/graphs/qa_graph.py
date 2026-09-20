@@ -1,10 +1,10 @@
 """LangGraph Q&A pipeline: query planning, retrieval, grading, and answering
-with citation escalation (§13).
+with citation escalation.
 
 The corrective-RAG loop is real, not cosmetic: when the grader marks a retrieval
-insufficient the planner escalates strategy (§13.3), so a retry genuinely
-changes the query rather than repeating it. The grader (§13.2) is the precision
-layer that gates the answer; `validate_citations` (§13.5) is a deterministic
+insufficient the planner escalates strategy, so a retry genuinely
+changes the query rather than repeating it. The grader is the precision
+layer that gates the answer; `validate_citations` is a deterministic
 guardrail that drops any citation the model invented before the user sees it.
 """
 
@@ -91,7 +91,7 @@ async def answer_node(state: QAState) -> dict:
 
 @tracing.traced("validate_citations")
 async def validate_citations(state: QAState) -> dict:
-    """Deterministic guardrail (§13.5): drop invented citations, resolve
+    """Deterministic guardrail: drop invented citations, resolve
     timestamps from chunk metadata, renumber markers, and hedge when nothing
     survives."""
     draft = state["draft"]
@@ -122,7 +122,7 @@ async def validate_citations(state: QAState) -> dict:
         )
 
     # Rewrite markers: survivors get their new number; dropped citations and
-    # dangling markers (§13.5.4) are stripped.
+    # dangling markers are stripped.
     def _sub(match: re.Match) -> str:
         old_n = int(match.group(1))
         new = old_to_new.get(old_n)
@@ -146,7 +146,7 @@ async def validate_citations(state: QAState) -> dict:
 
 @tracing.traced("insufficient")
 async def insufficient_node(state: QAState) -> dict:
-    """No LLM call (§13.6). Fixed honest-failure message plus the closest chapter
+    """No LLM call. Fixed honest-failure message plus the closest chapter
     titles drawn from whatever was retrieved."""
     titles: list[str] = []
     for chunk in state.get("chunks", []):
@@ -217,7 +217,7 @@ def _graph():
 
 
 def _build_trace(state: QAState, metrics, latency_ms: float) -> dict:
-    """Assemble the agent-trace product feature (§14.2/§16.5) from the run's
+    """Assemble the agent-trace product feature from the run's
     final state and in-process metrics."""
     plan = state.get("plan")
     grades = state.get("grades")
@@ -240,7 +240,7 @@ async def run_qa(
     *,
     history: list[dict] | None = None,
 ) -> QAState:
-    """Run the Q&A graph end to end, wrapped in one MLflow run (§17)."""
+    """Run the Q&A graph end to end, wrapped in one MLflow run."""
     params = {"video_id": video_id, "provider": llm.provider, "model": llm.model}
     async with tracing.run_context("videomind-qa", params) as metrics:
         state: QAState = {

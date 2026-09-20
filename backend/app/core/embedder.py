@@ -1,4 +1,4 @@
-"""Embedding backend abstraction (§12.2). The only module allowed to talk to an embedding backend.
+"""Embedding backend abstraction. The only module allowed to talk to an embedding backend.
 
 Defines the `Embedder` protocol plus `GeminiEmbedder` (default, everywhere)
 and `SentenceTransformerEmbedder` (offline-development escape hatch, the
@@ -140,7 +140,7 @@ def reset_embedder() -> None:
 
 
 async def probe_embedder(embedder: Embedder) -> None:
-    """Startup probe (§12.2.2): fail fast on dimension or norm mismatch."""
+    """Startup probe: fail fast on dimension or norm mismatch."""
     vec = await embedder.embed_query("probe")
     if len(vec) != embedder.dim:
         raise RuntimeError(f"Embedder dimension mismatch: expected {embedder.dim}, got {len(vec)}")

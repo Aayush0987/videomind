@@ -12,12 +12,12 @@ import type { Chapter } from "@/lib/types";
 
 // The rail is a to-scale map of the video: every block's height is proportional
 // to its real duration, so the spine down the left edge *is* the timeline
-// (§16.2). A floor keeps very short chapters legible without breaking the map.
+//. A floor keeps very short chapters legible without breaking the map.
 const PX_PER_SECOND = 0.9;
 const MIN_BLOCK_PX = 96;
 
 export interface ChapterRailHandle {
-  // Pulse a citation's position on the spine, then seek there (§16.2).
+  // Pulse a citation's position on the spine, then seek there.
   pulseAt: (seconds: number) => void;
 }
 
@@ -87,7 +87,7 @@ export const ChapterRail = forwardRef<
     [chapters, heights, offsets],
   );
 
-  // Arrow keys move focus between chapter blocks (§16.2 quality floor).
+  // Arrow keys move focus between chapter blocks.
   const onKeyDown = (e: React.KeyboardEvent, i: number) => {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();

@@ -1,4 +1,4 @@
-"""Wikipedia REST summary client for entity enrichment (§10.6).
+"""Wikipedia REST summary client for entity enrichment.
 
 Free, keyless, citable. `fetch_summary` returns `None` on a 404 or a
 disambiguation page so the caller can fall back to an LLM-generated blurb.

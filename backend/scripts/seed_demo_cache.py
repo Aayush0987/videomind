@@ -1,5 +1,5 @@
 """Pre-bakes demo videos locally into `backend/data/seed/` for a resilient
-deployed demo (§21.3).
+deployed demo.
 
 Runs the full analysis graph on a handful of hand-picked videos *locally* —
 where YouTube fetching works — and writes the resulting SQLite rows and Chroma

@@ -1,10 +1,7 @@
 """Typed domain errors surfaced across ingestion, LLM calls, and retrieval.
 
-The full closed set of `error_code` strings is defined in the build spec
-§14.1 and owned by the API layer (Phase 8). This module only defines the
-error classes that Phase 1 (`core/llm.py`, `core/ratelimit.py`) and Phase 2
-(`ingestion/*.py`, `services/pipeline.py`) code raises; later phases add
-their own subclasses here as they need them.
+Each class carries an `error_code` string; `app/main.py` maps those codes to
+HTTP statuses.
 """
 
 
@@ -63,7 +60,7 @@ class MetadataUnavailableError(VideoMindError):
 
 
 class TranscriptUnavailableError(VideoMindError):
-    """All four transcript acquisition rungs (§9.3) failed."""
+    """All four transcript acquisition rungs failed."""
 
     error_code = "transcript_unavailable"
 
@@ -75,19 +72,19 @@ class EmbeddingBackendUnavailable(VideoMindError):
 
 
 class VideoNotFound(VideoMindError):
-    """No analysis row exists for the requested `video_id` (§14.2)."""
+    """No analysis row exists for the requested `video_id`."""
 
     error_code = "video_not_found"
 
 
 class JobNotFound(VideoMindError):
-    """No job row exists for the requested `job_id` (§14.2)."""
+    """No job row exists for the requested `job_id`."""
 
     error_code = "job_not_found"
 
 
 class EmbeddingMismatch(VideoMindError):
     """A cached video was indexed with a different embedder than the one now
-    configured (§7.6) — `GET /api/videos/{id}` returns 409."""
+    configured — `GET /api/videos/{id}` returns 409."""
 
     error_code = "embedding_mismatch"

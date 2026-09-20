@@ -1,4 +1,4 @@
-"""Tests for graphs/qa_graph.py (§13, Phase 7 DoD).
+"""Tests for graphs/qa_graph.py.
 
 The four required scenarios:
 
@@ -224,7 +224,7 @@ async def test_retry_escalates_strategy(monkeypatch) -> None:
     result, metrics = await _run(_base_state())
 
     assert metrics.node_path.count("plan_query") == 2
-    # Escalation ladder (§13.3): direct→top_k 8, then decompose→top_k 12.
+    # Escalation ladder: direct→top_k 8, then decompose→top_k 12.
     assert top_ks == [8, 12]
     assert metrics.node_path[-1] == "validate_citations"
     assert result["insufficient"] is False

@@ -1,4 +1,4 @@
-"""Shared fixtures. No test may make a real network call (§18.1)."""
+"""Shared fixtures. No test may make a real network call."""
 
 from collections.abc import Iterator
 
@@ -7,7 +7,7 @@ from app import config
 from app.core import db, embedder, ratelimit
 
 # Deliberately no top-level `import litellm` here -- this file lives under
-# `tests/`, which is also covered by the ruff litellm import ban (§7). The
+# `tests/`, which is also covered by the ruff litellm import ban. The
 # fixture below reaches litellm.acompletion via a string target instead, so
 # it patches the real module without adding a syntactic `import litellm`.
 

@@ -1,10 +1,10 @@
-"""Request/response models for the HTTP API surface (§6, §14, §15)."""
+"""Request/response models for the HTTP API surface."""
 
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
-# --- Shared (§14.1) ------------------------------------------------------
+# --- Shared ------------------------------------------------------
 
 
 class LLMConfigIn(BaseModel):
@@ -140,7 +140,7 @@ class AskResponse(BaseModel):
     trace: TraceOut
 
 
-# --- POST /api/llm/ping (§16.7) -----------------------------------------
+# --- POST /api/llm/ping -----------------------------------------
 
 
 class PingResponse(BaseModel):

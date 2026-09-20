@@ -1,5 +1,5 @@
 """Entity extraction agent: identifies entities per chapter that may need
-enrichment (§10.6).
+enrichment.
 
 Runs on the concatenated chapter summaries (not the raw transcript — cheaper and
 less noisy). Returns an ``EntityExtraction`` capped at ``MAX_ENTITIES``.

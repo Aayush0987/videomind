@@ -1,4 +1,4 @@
-"""Local faster-whisper fallback transcription, rung 4 of §9.3.
+"""Local faster-whisper fallback transcription, rung 4 of the acquisition ladder.
 
 Skipped entirely when `ENABLE_WHISPER=false`.
 """

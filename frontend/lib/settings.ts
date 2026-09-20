@@ -1,4 +1,4 @@
-// localStorage-backed LLM config (§16.7) and the recent-videos list (§16.1).
+// localStorage-backed LLM config and the recent-videos list.
 // The key is *only* ever sent with a request; it is never persisted anywhere
 // but the user's own browser storage, and never logged.
 
@@ -16,7 +16,7 @@ function isBrowser(): boolean {
 
 // --- LLM config ----------------------------------------------------------
 
-// Exported for unit testing without touching the DOM (§18.3).
+// Exported for unit testing without touching the DOM.
 export function serializeLLMConfig(config: LLMConfig): string {
   return JSON.stringify(config);
 }

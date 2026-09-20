@@ -1,4 +1,4 @@
-// Typed fetch client — the frontend's only door to the backend (§14).
+// Typed fetch client — the frontend's only door to the backend.
 // Every request that can use a user-supplied model attaches the localStorage
 // LLM config; the key rides along per-request and is never stored server-side.
 
@@ -21,7 +21,7 @@ const API_BASE =
   "http://localhost:8000";
 
 // A thrown ApiError carries the backend's error envelope so the UI can show a
-// safe, specific message and branch on the machine-readable code (§14.1).
+// safe, specific message and branch on the machine-readable code.
 export class ApiError extends Error {
   code: string;
   detail?: string | null;
@@ -62,7 +62,7 @@ function withLLM<T extends object>(payload: T): T & { llm?: LLMConfig } {
   return hasLLMConfig(config) ? { ...payload, llm: config } : payload;
 }
 
-// --- Endpoints (§14.2) ---------------------------------------------------
+// --- Endpoints ---------------------------------------------------
 
 export function analyzeVideo(
   url: string,
@@ -101,7 +101,7 @@ export function deleteVideo(videoId: string): Promise<void> {
   return request<void>(`/videos/${videoId}`, { method: "DELETE" });
 }
 
-// The Settings drawer's "Test connection" button — one 5-token generate (§16.7).
+// The Settings drawer's "Test connection" button — one 5-token generate.
 export function pingLLM(config: LLMConfig): Promise<PingResponse> {
   return request<PingResponse>("/llm/ping", {
     method: "POST",

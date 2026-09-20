@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Trace } from "@/lib/types";
 
-// The collapsible reasoning panel under each answer (§16.5). It renders the
+// The collapsible reasoning panel under each answer. It renders the
 // node path as chips, the strategy, retrieved-vs-kept counts, and any dropped
 // citations — this is the system showing its work and where it self-corrected.
 export function AgentTrace({ trace }: { trace: Trace }) {

@@ -1,4 +1,4 @@
-"""Video ingestion and analysis endpoints (§14.2)."""
+"""Video ingestion and analysis endpoints."""
 
 import uuid
 

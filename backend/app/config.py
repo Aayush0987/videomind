@@ -1,18 +1,21 @@
-"""Application settings, loaded from environment variables (§19).
+"""Application settings, loaded from environment variables.
 
 Nothing else in the codebase reads `os.environ` directly — every value
-flows through the `Settings` singleton defined here. Tuning constants
-(chunking thresholds, MMR lambda, etc.) are added to this module by the
-phase that introduces them; none exist yet.
+flows through the `Settings` singleton defined here. Code-level tuning
+constants (chunking thresholds, MMR lambda, retrieval limits) live below it.
 """
 
+from pathlib import Path
 from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# The repo-root .env, regardless of the working directory (`make dev` runs from backend/).
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=_REPO_ROOT / ".env", extra="ignore")
 
     # --- LLM ---
     DEFAULT_LLM_PROVIDER: Literal["gemini", "openai", "anthropic", "custom"] = "gemini"
@@ -54,7 +57,7 @@ class Settings(BaseSettings):
     MLFLOW_TRACKING_URI: str = "file:./data/mlruns"
 
     # --- Enrichment ---
-    SEARCH_PROVIDER: Literal["wikipedia", "tavily", "none"] = "wikipedia"
+    SEARCH_PROVIDER: Literal["wikipedia", "none"] = "wikipedia"
 
     # --- Server ---
     FRONTEND_ORIGIN: str = "http://localhost:3000"
@@ -67,7 +70,7 @@ settings = Settings()
 # --- Tuning constants (code-level, not environment-configurable; bump in
 # code review, not via .env) ---
 APP_VERSION = "1.0.0"
-MAX_CONCURRENT_JOBS = 1  # §15 — one Whisper job at a time on a free-tier box.
+MAX_CONCURRENT_JOBS = 1  # one Whisper job at a time on a free-tier box.
 CURRENT_ANALYSIS_VERSION = 1
 UNIT_MAX_SECONDS = 15.0
 UNIT_MAX_CHARS = 350
@@ -84,12 +87,12 @@ BANNED_TITLE_PREFIXES = ("chapter", "introduction to")
 MAX_ENTITIES = 15
 MAX_ENRICHMENTS = 6
 
-# --- Q&A / retrieval (§13) ---
+# --- Q&A / retrieval ---
 RELEVANCE_THRESHOLD = 0.6
 MIN_RELEVANT_CHUNKS = 2
 MAX_RETRIEVAL_ATTEMPTS = 2
 QA_HISTORY_TURNS = 6
-# Retry escalation ladder (§13.3): attempt -> (strategy, top_k). A retry that
+# Retry escalation ladder: attempt -> (strategy, top_k). A retry that
 # changes nothing is not a corrective-RAG loop; this table makes each pass
 # different. Attempts beyond the last row clamp to it.
 RETRIEVAL_ESCALATION: dict[int, tuple[str, int]] = {
@@ -97,18 +100,18 @@ RETRIEVAL_ESCALATION: dict[int, tuple[str, int]] = {
     1: ("decompose", 12),
     2: ("keyword", 16),
 }
-# §13.6 — the honest-failure message returned by the insufficient node.
+# The honest-failure message returned by the insufficient node.
 INSUFFICIENT_MESSAGE = "I couldn't find that in this video."
 INSUFFICIENT_SUGGESTION_PREFIX = "The closest topics covered are:"
-# §13.5.5 — prepended when zero citations survive validation.
+# Prepended when zero citations survive validation.
 LOW_CONFIDENCE_HEDGE = (
     "I couldn't ground this answer in specific passages, so treat it with caution:"
 )
 
-# §15 — recorded on any job left `running`/`queued` by a mid-job restart.
+# Recorded on any job left `running`/`queued` by a mid-job restart.
 INTERRUPTED_MESSAGE = "Processing was interrupted. Try again."
 
-# Per-stage progress weights (§10.3). Sum to 1.0; each analysis-graph node's
+# Per-stage progress weights. Sum to 1.0; each analysis-graph node's
 # first action reports `jobs.update(job_id, stage=<name>, progress=cumulative)`.
 STAGE_WEIGHTS: dict[str, float] = {
     "resolve_source": 0.05,
@@ -122,7 +125,7 @@ STAGE_WEIGHTS: dict[str, float] = {
     "index": 0.05,
 }
 
-# §14.2/§16.4 — user-facing label for each stage, shown in the processing
+# User-facing label for each stage, shown in the processing
 # timeline while a job polls. Keyed to STAGE_WEIGHTS.
 STAGE_LABELS: dict[str, str] = {
     "resolve_source": "Resolving video",

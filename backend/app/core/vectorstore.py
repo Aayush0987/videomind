@@ -1,6 +1,6 @@
-"""Chroma persistent client wrapper: collection naming, upsert, and query (§12.3).
+"""Chroma persistent client wrapper: collection naming, upsert, and query.
 
-Also contains the retrieval pipeline (§12.4): recall → dedupe → MMR → sort.
+Also contains the retrieval pipeline: recall → dedupe → MMR → sort.
 """
 
 import math
@@ -88,7 +88,7 @@ def _mmr(
     top_k: int,
     lambda_: float = MMR_LAMBDA,
 ) -> list[dict]:
-    """Maximal Marginal Relevance selection (~20 lines, per §12.4)."""
+    """Maximal Marginal Relevance selection (~20 lines)."""
     if not candidates:
         return []
 

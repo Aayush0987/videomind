@@ -1,9 +1,9 @@
 // Pure display helpers shared across components. Kept dependency-free so they
-// can be unit-tested in isolation (§18.3: timecode formatting, marker→chip).
+// can be unit-tested in isolation (timecode formatting, marker→chip).
 
 import type { Citation } from "./types";
 
-// Timecodes are always mm:ss, and only grow to h:mm:ss past 60 minutes (§16.2).
+// Timecodes are always mm:ss, and only grow to h:mm:ss past 60 minutes.
 export function formatTimecode(seconds: number): string {
   const total = Math.max(0, Math.floor(seconds));
   const s = total % 60;

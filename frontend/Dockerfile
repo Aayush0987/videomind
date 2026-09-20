@@ -1,4 +1,4 @@
-# Multi-stage production build for the Next.js frontend (§21.1).
+# Multi-stage production build for the Next.js frontend.
 # Uses Next.js standalone output so the runtime image ships only the compiled
 # server plus its traced node_modules — no full dev dependency tree.
 FROM node:20-slim AS deps

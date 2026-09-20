@@ -1,9 +1,8 @@
-"""In-memory stand-in for app.core.llm.generate/generate_structured (§18.1).
+"""In-memory stand-in for app.core.llm.generate/generate_structured.
 
 Never touches the network. Monkeypatch `app.core.llm.generate` /
 `app.core.llm.generate_structured` with a `FakeLLM` instance's bound methods
-in unit tests; the same instance is injected via FastAPI dependency override
-starting in Phase 8.
+in unit tests; the same instance is injected via FastAPI dependency override.
 """
 
 from dataclasses import dataclass

@@ -1,4 +1,4 @@
-"""Tests for agents/titling.py (§10.5, Phase 5 DoD).
+"""Tests for agents/titling.py.
 
 The headline guarantee: batching keeps LLM cost flat — 20 chapters cost 4
 titling calls, not 20.

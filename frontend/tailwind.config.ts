@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 
-// §16.2 palette — two accents, each with exactly one meaning:
+// Palette — two accents, each with exactly one meaning:
 //   cyan  → playhead + active chapter
 //   amber → citations + retry indicators (never reused for anything else)
 const config: Config = {

@@ -2,6 +2,8 @@
 the Q&A graph together.
 """
 
+from typing import Literal
+
 from app.config import settings
 from app.core.errors import TranscriptUnavailableError, VideoTooLongError
 from app.ingestion import captions, normalize, whisper
@@ -16,7 +18,7 @@ def acquire_transcript(video_id: str, url: str, duration: float) -> Transcript:
         )
 
     result = captions.fetch_captions(video_id, url)
-    source = "captions"
+    source: Literal["captions", "whisper"] = "captions"
     if result is None and settings.ENABLE_WHISPER:
         result = whisper.transcribe(video_id, url)
         source = "whisper"

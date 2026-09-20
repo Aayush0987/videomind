@@ -1,4 +1,4 @@
-"""Chunking logic (§12.1). Builds chunks from SentenceUnits, never raw characters.
+"""Chunking logic. Builds chunks from SentenceUnits, never raw characters.
 
 Chunks respect chapter boundaries, apply greedy accumulation up to
 CHUNK_MAX_CHARS, and overlap by CHUNK_OVERLAP_UNITS.
@@ -12,7 +12,7 @@ from app.schemas.transcript import SentenceUnit
 
 @dataclass
 class ChapterRange:
-    """Minimal chapter descriptor for chunking. Phase 4 produces these."""
+    """Minimal chapter descriptor for chunking. Built from the verified chapters."""
 
     chapter_id: str
     chapter_idx: int

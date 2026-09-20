@@ -1,4 +1,4 @@
-"""Tests for app.core.embedder (§12.2). Uses respx to mock the Gemini
+"""Tests for app.core.embedder. Uses respx to mock the Gemini
 embedding REST API — no live network calls."""
 
 import math

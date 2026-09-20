@@ -1,4 +1,4 @@
-"""MLflow run/span helpers: `@traced(node_name)` decorator and `run_context` (§17).
+"""MLflow run/span helpers: `@traced(node_name)` decorator and `run_context`.
 
 A no-op when `MLFLOW_ENABLED=false`, so tests and the deployed instance can
 run without an MLflow backend.
@@ -40,7 +40,7 @@ _SAFE_PARAM_KEYS = frozenset(
 
 @dataclass
 class RunMetrics:
-    """Run-scoped, in-process metrics accumulator (§17)."""
+    """Run-scoped, in-process metrics accumulator."""
 
     node_path: list[str] = field(default_factory=list)
     node_latency_ms: dict[str, float] = field(default_factory=dict)
@@ -99,7 +99,7 @@ def traced(node_name: str) -> Callable[[F], F]:
 
 @contextlib.asynccontextmanager
 async def run_context(experiment: str, params: dict[str, Any]) -> AsyncIterator[RunMetrics]:
-    """One MLflow run per graph execution (§17). Yields the `RunMetrics` the
+    """One MLflow run per graph execution. Yields the `RunMetrics` the
     caller and graph nodes populate; exports it on exit when MLflow is enabled."""
     metrics = RunMetrics(params=dict(params))
     token = _current.set(metrics)
@@ -112,7 +112,7 @@ async def run_context(experiment: str, params: dict[str, Any]) -> AsyncIterator[
 
     import mlflow
 
-    # The plan (§17, §19) pins a `file:` tracking backend for the free tier;
+    # The plan pins a `file:` tracking backend for the free tier;
     # mlflow 3.x gates that behind an opt-in env var.
     os.environ.setdefault("MLFLOW_ALLOW_FILE_STORE", "true")
     mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)

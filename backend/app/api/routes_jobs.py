@@ -1,4 +1,4 @@
-"""Job status and progress polling endpoints (§14.2, §15)."""
+"""Job status and progress polling endpoints."""
 
 from fastapi import APIRouter
 

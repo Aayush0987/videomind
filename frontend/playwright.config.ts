@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // Smoke test runs against the Next dev server with a fully mocked API, so no
-// backend or provider key is needed (§18.3). CI runs it only on PRs that touch
+// backend or provider key is needed. CI runs it only on PRs that touch
 // frontend/.
 export default defineConfig({
   testDir: "./tests",

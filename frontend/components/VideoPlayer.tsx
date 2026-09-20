@@ -33,7 +33,7 @@ declare global {
 
 const SCRIPT_ID = "youtube-iframe-api";
 
-// Load the IFrame API exactly once, resolving when window.YT is ready (§16.6).
+// Load the IFrame API exactly once, resolving when window.YT is ready.
 function loadYouTubeApi(): Promise<void> {
   return new Promise((resolve) => {
     if (window.YT?.Player) {
@@ -85,7 +85,7 @@ export const VideoPlayer = forwardRef<
         videoId,
         playerVars: { rel: 0, modestbranding: 1, playsinline: 1 },
       });
-      // Drive the playhead + active-chapter highlight at 500 ms (§16.6).
+      // Drive the playhead + active-chapter highlight at 500 ms.
       ticker = setInterval(() => {
         const t = playerRef.current?.getCurrentTime?.();
         if (typeof t === "number") onTimeRef.current?.(t);

@@ -1,5 +1,5 @@
 """Deterministic verification agent: validates and repairs chapter segmentation
-against 12 rules (§11).
+against 12 rules.
 
 Must not import anything from `core/llm.py` — verification is rule-based,
 not LLM-based, by design.

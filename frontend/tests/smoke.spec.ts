@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const VIDEO_ID = "dQw4w9WgXcQ";
 
-// Full flow against a mocked API (§18.3): paste URL → timeline advances →
+// Full flow against a mocked API: paste URL → timeline advances →
 // chapters render → ask a question → citation chip appears → clicking it seeks.
 test("paste, process, ask, and seek from a citation", async ({ page }) => {
   // Replace the YouTube IFrame API with a fake that records seekTo calls, so we

@@ -1,9 +1,9 @@
 """LangGraph analysis pipeline: ingestion through segmentation, verification,
-titling, and indexing (§10.1-10.3).
+titling, and indexing.
 
 Every node's first action reports progress via `jobs.update`. Nodes are wrapped
 with `@traced` so the run's `RunMetrics` records the node path and latencies.
-The failure policy is repair-before-resegment (§10.2): deterministic repair is
+The failure policy is repair-before-resegment: deterministic repair is
 tried first, and only structural failures escalate to a fresh LLM segmentation,
 capped at `MAX_SEGMENTATION_ATTEMPTS`.
 """
@@ -26,7 +26,7 @@ from app.schemas.transcript import TranscriptCue
 from app.services import jobs
 from app.services.pipeline import acquire_transcript
 
-# Cumulative progress per stage, in pipeline order (§10.3). A node reports the
+# Cumulative progress per stage, in pipeline order. A node reports the
 # cumulative weight up to and including its stage.
 _STAGE_ORDER = list(STAGE_WEIGHTS)
 _CUMULATIVE: dict[str, float] = {}
@@ -74,7 +74,7 @@ async def propose_boundaries(state: AnalysisState) -> dict:
     transcript = state["transcript"]
     metadata = state["metadata"]
     attempts = state.get("segmentation_attempts", 0) + 1
-    # A re-segmentation surfaces as an amber retry indicator in the UI (§16.4).
+    # A re-segmentation surfaces as an amber retry indicator in the UI.
     if attempts > 1:
         jobs.update(state["job_id"], retries={"segmentation": attempts - 1})
     boundaries = await segmentation.propose_boundaries(
@@ -279,7 +279,7 @@ def _graph():
 
 
 async def run_analysis(job_id: str, url: str, llm: LLMConfig) -> AnalysisState:
-    """Run the analysis graph end to end, wrapped in one MLflow run (§17)."""
+    """Run the analysis graph end to end, wrapped in one MLflow run."""
     from app.config import CURRENT_ANALYSIS_VERSION, settings
 
     jobs.update(job_id, url=url, status="running", progress=0.0)

@@ -1,4 +1,4 @@
-"""Tests for core/wikipedia.fetch_summary (§10.6)."""
+"""Tests for core/wikipedia.fetch_summary."""
 
 import httpx
 import pytest

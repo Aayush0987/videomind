@@ -1,9 +1,9 @@
-"""Secret-leakage guard (§7.3, §17, Phase 8 DoD).
+"""Secret-leakage guard.
 
 Run a full (faked) analysis with a sentinel API key threaded through the
 `LLMConfig`, then prove the key is absent from every durable surface: the
 SQLite file, the MLflow run directory, and the captured logs. The key must live
-only in memory for the duration of the request (§16.7's promise made true).
+only in memory for the duration of the request.
 """
 
 import logging

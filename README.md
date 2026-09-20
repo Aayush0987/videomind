@@ -1,40 +1,92 @@
 # VideoMind
 
-**Paste a YouTube link → get a chaptered, summarised, searchable video you can
-interrogate in natural language, with every answer citing a clickable
-timestamp.**
+**Paste a YouTube link, get topic-based chapters and a Q&A agent that answers
+questions about the video with clickable timestamp citations.**
+
+<!-- TODO: replace with a demo GIF: paste URL -> chapter rail -> ask a question -> click a citation -->
+> 🎬 *Demo GIF coming soon.*
 
 ## What it does
 
 1. You paste a YouTube URL.
 2. The backend fetches the transcript (captions, or local Whisper as a
    fallback), splits it into topic-based chapters, titles and summarises
-   each one, and indexes the whole thing for retrieval.
-3. You get a chapter rail synced to the video player — click a chapter,
+   each one, and indexes it for retrieval.
+3. You get a chapter rail synced to the video player. Click a chapter and
    the player seeks there.
-4. You ask questions about the video in a chat panel. Every answer cites
-   the exact timestamp it came from; click the citation, the player jumps
-   there.
+4. You ask questions in a chat panel. Every answer cites the timestamp it
+   came from, and clicking the citation seeks the player to it.
 
-## Why it's built the way it is
+## Why I built it
 
-Most portfolio RAG projects are a single chain: prompt in, text out.
-VideoMind is built around three theses instead.
+Nobody asked for this. I wanted to build an agent system where the LLM is
+not trusted to be right: most RAG demos are one chain (prompt in, text
+out), and a wrong timestamp or an invented citation goes straight to the
+user. VideoMind is my attempt at the alternative, where each LLM step is
+followed by something that can reject it.
 
-1. **LLMs propose, deterministic Python disposes.** Every LLM stage is
-   followed by a non-LLM validator that can reject its output. A
-   twelve-rule verifier catches bad chapter boundaries; a citation
-   validator strips any timestamp the model didn't actually retrieve. No
-   LLM is ever trusted to produce a correct timestamp.
-2. **The graph is a state machine, not a chain.** Conditional edges —
-   skip-enrichment, repair-loop, retrieval-retry — mean two different
-   videos take two different paths through the same LangGraph. A retry
-   shown in the processing timeline is a real edge firing, not a spinner.
-3. **The provider is a runtime parameter, not a build-time dependency.**
-   No agent imports `openai`, `google.generativeai`, or `anthropic`. There
-   is one seam (`backend/app/core/llm.py`, the only file allowed to import
-   `litellm`), so switching from Gemini to OpenAI in the Settings drawer
-   changes which API is called with zero code changes.
+## Architecture in brief
+
+- **Multi-agent orchestration on LangGraph.** Two graphs: an *analysis*
+  graph (resolve, transcript, segment, verify/repair, title, entities,
+  enrich, index, persist) and a *Q&A* graph (plan query, retrieve, grade,
+  answer, validate citations). Seven LLM agents and two deterministic
+  ones, each making one decision. Conditional edges mean different videos
+  and questions take different paths through the same graph.
+- **Corrective-RAG retry loop.** After retrieval, a grader LLM decides
+  whether the retrieved chunks are sufficient. If not, the query planner
+  runs again with the grader's "missing information" and a different
+  strategy (direct, then decompose into sub-queries), for at most two
+  retrieval passes. If nothing relevant is found, the graph returns a
+  fixed "I couldn't find that in this video" answer instead of guessing.
+- **Deterministic guardrails between LLM stages.** Chapters go through a
+  12-rule verifier (`agents/verification.py`, no LLM imports, enforced by a
+  test) with automatic repair; if repair fails the graph re-segments once.
+  Answers go through a citation validator that drops any citation whose
+  chunk wasn't actually retrieved and takes timestamps from chunk metadata,
+  never from the model.
+- **Provider is a runtime parameter.** Only `core/llm.py` imports
+  `litellm`; the Settings drawer selects provider, model, key and base URL
+  per request.
+
+Details, diagrams and the rule table are in [How it works](#how-it-works).
+Design decisions are in [DECISIONS.md](DECISIONS.md).
+
+## Status
+
+**Done and covered by automated tests** (179 backend tests, which use a fake
+LLM and no network; 9 frontend unit tests; 1 mocked-API Playwright test):
+- Ingestion: URL parsing, four-rung transcript ladder, sentence
+  normalisation, SQLite cache.
+- Embeddings (Gemini, 768d, re-normalised), chapter-aware chunking, Chroma
+  vector store, recall, MMR and chronological retrieval.
+- Segmentation, the R1-R12 verifier and repair, including a Hypothesis
+  property test.
+- Titling, entity extraction, Wikipedia enrichment.
+- Both LangGraph graphs, MLflow tracing, the citation validator.
+- FastAPI endpoints, in-process job runner, per-IP rate limit.
+- Next.js frontend: chapter rail, player, Q&A panel with agent trace,
+  settings drawer. The Playwright smoke test runs against a mocked API.
+
+**Written but not verified end to end:**
+- `docker compose up` (Dockerfiles and compose file exist).
+- Non-Gemini providers (OpenAI, Anthropic, custom endpoint): only the
+  provider mapping is unit-tested; there are no live-API tests.
+- Local Whisper fallback.
+
+**Not done:**
+- No deployed demo and no committed seed cache
+  (`backend/scripts/seed_demo_cache.py` exists but its output is not in
+  the repo).
+- No evaluation harness for answer quality or citation precision (see
+  Roadmap). There are no benchmark numbers for this project.
+- Demo GIF.
+- The retrieval escalation table in `app/config.py` has a third
+  "keyword" row, but `MAX_RETRIEVAL_ATTEMPTS = 2` means only the first two
+  rows are ever used.
+- If chapters still fail verification after repair and re-segmentation,
+  the pipeline proceeds with the best chapters it has rather than failing
+  the job.
 
 ## How it works
 
@@ -115,18 +167,18 @@ re-segments **once**, never in an unbounded loop.
 | R9 | `3 ≤ n ≤ 25` chapters | merge / re-segment |
 | R10 | title ≤ 80 chars, unique | truncate / disambiguate |
 
-The strongest claim in the project is a **Hypothesis property test**: for
-*any* list of random floats read as chapter boundaries,
+The strongest test in the project is a **Hypothesis property test**: for
+random lists of floats read as chapter boundaries,
 `build_chapters → repair_chapters → verify_chapters` produces either a
-valid set or a report whose only remaining issues are warnings.
-Structural validity is proven, not hoped for.
+valid set or a report whose only remaining issues are warnings. That is
+property-based testing, not a formal proof.
 
 ### Provider-agnostic by design
 
 The Settings drawer has four fields — **provider, model, API key, base
 URL** — and nothing else. Switching provider changes which API `litellm`
-calls at runtime; no agent imports a provider SDK, so there is nothing to
-recompile. Your key is sent with each request and used only for that
+calls at runtime; no agent imports a provider SDK. (Only the provider
+mapping is unit-tested; see Status.) Your key is sent with each request and used only for that
 request — it is never stored on the server.
 
 ### Persistence
@@ -149,6 +201,7 @@ backend/    FastAPI app — agents/, graphs/ (LangGraph), core/ (llm, embedder,
             schemas/, prompts/ (*.md), tests/
 frontend/   Next.js app — player, chapter rail, chat panel, settings drawer
 docker-compose.yml   backend + frontend, one populated .env
+DECISIONS.md         architectural decision log
 ```
 
 ## Setup
@@ -193,14 +246,15 @@ cp .env.example .env
 docker compose up
 ```
 
-That brings up the backend on `:8000` and the frontend on `:3000` with no
+A valid `GEMINI_API_KEY` is required: the backend probes the embedding API
+on startup and exits if it fails. That brings up the backend on `:8000` and the frontend on `:3000` with no
 further steps. Open <http://localhost:3000>, paste a link, and go.
 
 **Running without Docker:**
 
 ```bash
-# terminal 1 — backend
-python -m venv .venv && source .venv/bin/activate
+# terminal 1 — backend (reads the repo-root .env)
+python3.11 -m venv .venv && source .venv/bin/activate
 pip install -e "backend[dev]"
 make dev            # http://localhost:8000
 

@@ -1,4 +1,4 @@
-"""LLM provider abstraction (§7). The only module in the repo allowed to
+"""LLM provider abstraction. The only module in the repo allowed to
 import litellm.
 
 Exposes exactly two async functions, `generate` and `generate_structured`,
@@ -38,7 +38,7 @@ _LIMITS_BY_PROVIDER: dict[str, Callable[[], tuple[int, int | None]]] = {
     "custom": lambda: (settings.CUSTOM_RPM, None),
 }
 
-_RETRY_BACKOFF_SECONDS = (1.0, 4.0, 12.0)  # one delay per retry (§7.4)
+_RETRY_BACKOFF_SECONDS = (1.0, 4.0, 12.0)  # one delay per retry
 _MAX_ATTEMPTS = 1 + len(_RETRY_BACKOFF_SECONDS)  # 1 initial + 3 retries
 _JITTER_SECONDS = 0.5
 _FENCE_RE = re.compile(r"^```(?:json)?\s*\n?(.*?)\n?```$", re.DOTALL)

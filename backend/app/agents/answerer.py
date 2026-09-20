@@ -1,7 +1,7 @@
-"""Answer generation agent: produces the final cited answer from retrieved chunks (§13).
+"""Answer generation agent: produces the final cited answer from retrieved chunks.
 
 The model answers only from the supplied chunks and cites by ``chunk_id`` plus a
-short quote — it never supplies timestamps. Deterministic code (§13.5) resolves
+short quote — it never supplies timestamps. Deterministic code resolves
 each cited chunk's real time range afterwards, which makes a hallucinated
 timestamp structurally impossible.
 """
@@ -47,7 +47,7 @@ async def answer(
     chunks: list[dict],
     llm_config: LLMConfig,
 ) -> AnswerDraft:
-    """Draft a cited answer grounded only in ``chunks`` (§13.4)."""
+    """Draft a cited answer grounded only in ``chunks``."""
     template = load_prompt("answerer")
     prompt = template.format(
         question=question,

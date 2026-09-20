@@ -1,4 +1,4 @@
-"""Cache semantics for `POST /api/videos` (§12.3, Phase 8 DoD).
+"""Cache semantics for `POST /api/videos`.
 
 The headline guarantee (criterion A8): a second analyze request for an
 already-indexed video is a cache *hit* that returns immediately and makes zero

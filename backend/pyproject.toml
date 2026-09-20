@@ -43,3 +43,12 @@ include = ["app*"]
 addopts = "--strict-markers"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.mypy]
+ignore_missing_imports = true
+
+# chromadb's query/upsert signatures are typed for numpy arrays and Optional
+# result fields; our list-based usage is correct at runtime.
+[[tool.mypy.overrides]]
+module = "app.core.vectorstore"
+disable_error_code = ["arg-type", "index", "assignment"]

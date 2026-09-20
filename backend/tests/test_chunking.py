@@ -1,4 +1,4 @@
-"""Tests for app.core.chunking (§12.1), MMR (§12.4), and collection naming (§12.3)."""
+"""Tests for app.core.chunking, MMR, and collection naming."""
 
 from app.core.chunking import ChapterRange, build_chunks
 from app.core.vectorstore import _cosine_sim, _mmr, slug

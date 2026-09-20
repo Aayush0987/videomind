@@ -1,10 +1,10 @@
-"""SQLite-backed job registry and background runner for async analysis (§15).
+"""SQLite-backed job registry and background runner for async analysis.
 
 Job state lives in the `jobs` table, not a process dict, so a restart mid-job
 leaves an honest record: `cleanup_stale` marks any interrupted row `failed`.
 A module-level `asyncio.Semaphore(MAX_CONCURRENT_JOBS)` serialises analyses so a
 free-tier box never runs two Whisper jobs at once. Progress is clamped
-monotonically — the timeline (§16.4) never moves backwards, even when the graph
+monotonically — the timeline never moves backwards, even when the graph
 loops back to an earlier stage on a re-segment.
 """
 
@@ -97,7 +97,7 @@ def _write(conn: sqlite3.Connection, job: Job, now: str) -> None:
 
 
 def create(job_id: str, url: str = "") -> Job:
-    """Insert a fresh `queued` job row (§15)."""
+    """Insert a fresh `queued` job row."""
     return update(job_id, url=url, status="queued", progress=0.0)
 
 
@@ -120,7 +120,7 @@ def get(job_id: str) -> Job | None:
 
 def cleanup_stale() -> None:
     """On startup, mark any job left `running`/`queued` by a crash as `failed`
-    with an honest interrupted message (§15)."""
+    with an honest interrupted message."""
     conn = _conn()
     conn.execute(
         """
@@ -134,7 +134,7 @@ def cleanup_stale() -> None:
 
 
 def schedule(job_id: str, url: str, llm: LLMConfig) -> None:
-    """Fire-and-forget the analysis under the concurrency semaphore (§15)."""
+    """Fire-and-forget the analysis under the concurrency semaphore."""
     asyncio.create_task(_run_job(job_id, url, llm))
 
 
